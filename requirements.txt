@@ -4,3 +4,4 @@ mysql-connector-python==8.0.28
 
 # Machine Learning requirements
 tensorflow==2.8.0
+scikit-learn==1.0.2
