@@ -170,3 +170,12 @@ class SemanticNetworkQueries:
         return self.db.execute_query(query, all)
     
     #########################
+    
+    def get_all_tui(self, all=True) -> List[Any]:
+        """Get all TUI
+        
+        Returns:
+            List[Any]: All TUI
+        """
+        query = "SELECT UI FROM SRDEF WHERE RT='STY' ORDER BY UI"
+        return self.db.execute_query(query, all)
