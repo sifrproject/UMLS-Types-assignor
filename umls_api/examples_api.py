@@ -97,7 +97,7 @@ if db.connect():
     #     print("\n")
     
     # # Get all concept with a given semantic type
-    # res = meta.get_all_mrcon_with_sty()
+    # res = meta.get_all_mrcon_with_sty(nb_data=10)
     # for row in res:
     #     print(row)
     #     print("\n")

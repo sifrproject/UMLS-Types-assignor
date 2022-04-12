@@ -64,15 +64,18 @@ class MetathesaurusQueries:
         return tup
             
 
-    def get_all_mrcon_with_sty(self, language=Languages.ENG, all=True) -> List[Tuple[str, str, str, str, str]]:
+    def get_all_mrcon_with_sty(self, nb_data=0, language=Languages.ENG, all=True) -> List[Tuple[str, str, str, str, str]]:
         """Returns all concepts with STY
 
         Returns:
             List[Tuple[str, str, str, str, str]]: All concepts with STY. Each concept is a tuple of (Label, SAB, CUI, STYLabel, TUI)
         """
-        query = "SELECT a.str, c.sab, a.cui, b.sty, b.tui FROM MRCON a, MRSTY b, MRSO c WHERE LAT = '{}' AND a.cui=b.cui AND a.ts = 'P' AND a.stt = 'PF' AND a.lui=c.lui LIMIT 50 OFFSET 700".format(
-            language.value)
-        alphabeticSortedTuples = self._sortTuple(self.db.execute_query(query, all))
+        query = "SELECT a.str, c.sab, a.cui, b.sty, b.tui FROM MRCON a, MRSTY b, MRSO c WHERE LAT = '{}' AND a.cui=b.cui AND a.ts = 'P' AND a.stt = 'PF' AND a.lui=c.lui {}".format(
+            language.value, "" if nb_data == 0 else "LIMIT " + str(nb_data))
+        res = self.db.execute_query(query, all)
+        if (res == None):
+            return None
+        alphabeticSortedTuples = self._sortTuple(res)
         return self._removeDuplicated(alphabeticSortedTuples)
 
     def get_source_from_cui(self, cui: str, auth: Authentication) -> str:
