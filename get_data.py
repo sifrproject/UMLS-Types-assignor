@@ -6,9 +6,6 @@ from umls_api.semantic_network_queries import SemanticNetworkQueries
 from umls_api.authentication_umls_api import Authentication
 import pandas as pd
 
-if not db.connect():
-    exit(84)
-
 meta = MetathesaurusQueries(db)
 sty = SemanticNetworkQueries(db)
 auth = Authentication(UMLS_API_KEY)
@@ -27,7 +24,7 @@ all_tui = sty.get_all_tui()
 for index, item in enumerate(all_tui):
     tui_indexes[item[0]] = index
 
-res = meta.get_all_mrcon_with_sty(nb_data=10)
+res = meta.get_all_mrcon_with_sty(nb_data=500)
 count = 0
 X = []
 Y = []
@@ -77,25 +74,19 @@ data = pd.concat([data, pd.DataFrame(Y, columns=['TUI', 'TUI_Index'])], axis=1)
 
 ################ Nb_Parents and Nb_Children ###############
 
-# Prepare the nb_parents and nb_children to be used in the model
-mean_all_parents = data['Nb_Parents'].mean()
-mean_all_children = data['Nb_Children'].mean()
-print("Mean of parents", mean_all_parents)
-print("Mean of children", mean_all_children)
-data.loc[data['Nb_Parents'].isnull(), 'Nb_Parents'] = mean_all_parents
-data.loc[data['Nb_Children'].isnull(), 'Nb_Children'] = mean_all_children
-# Normalize the data
-data['Nb_Parents'] = (data['Nb_Parents'] - data['Nb_Parents'].min()) / (data['Nb_Parents'].max() - data['Nb_Parents'].min())
-data['Nb_Children'] = (data['Nb_Children'] - data['Nb_Children'].min()) / (data['Nb_Children'].max() - data['Nb_Children'].min())
+# # Prepare the nb_parents and nb_children to be used in the model # TODO set in the notebook
+# mean_all_parents = data['Nb_Parents'].mean()
+# mean_all_children = data['Nb_Children'].mean()
+# print("Mean of parents", mean_all_parents)
+# print("Mean of children", mean_all_children)
+# data.loc[data['Nb_Parents'].isnull(), 'Nb_Parents'] = mean_all_parents
+# data.loc[data['Nb_Children'].isnull(), 'Nb_Children'] = mean_all_children
+
+# # Normalize the data # TODO set in the notebook
+# data['Nb_Parents'] = (data['Nb_Parents'] - data['Nb_Parents'].min()) / (data['Nb_Parents'].max() - data['Nb_Parents'].min())
+# data['Nb_Children'] = (data['Nb_Children'] - data['Nb_Children'].min()) / (data['Nb_Children'].max() - data['Nb_Children'].min())
 
 ###########################################################
-
-
-################ Definition ##############################
-
-# TODO : Use definition of the concept to predict the TUI
-
-##########################################################
 
 # Save X and Y in the same csv file
 data.to_csv('data.csv', index=False)
