@@ -5,6 +5,10 @@ pymysql==1.0.2
 python-dotenv==0.20.0
 mysql-connector-python==8.0.28
 
+# Plottings
+matplotlib==3.5.1
+seaborn==0.11.2
+
 # Machine Learning requirements
 tensorflow==2.8.0
 scikit-learn==1.0.2
