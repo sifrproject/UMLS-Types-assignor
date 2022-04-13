@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-import mysql.connector
-from mysql.connector import Error
+import pymysql
+import pymysql.cursors
 
 # Import the .env file
 dotenv_path = Path('.env')
@@ -26,30 +26,17 @@ class DatabaseConnection:
         print("Password: " + self.password)
         self.database = database
         print("Database: " + self.database)
-        self.connection = None
-        self.cursor = None
+        self.connector = None
+        self.__connect()
 
     # Method to connect to database
-    def connect(self):
-        try:
-            self.connection = mysql.connector.connect(host=self.host,
-                                                      user=self.user,
-                                                      password=self.password,
-                                                      database=self.database)
-            self.cursor = self.connection.cursor()
-            print("Connected to MySQL database")
-            return True
-        except Error as e:
-            print(e)
-            print("Failed to connect to MySQL database")
-            return False
-
-    # Method to disconnect from database
-    def disconnect(self):
-        if self.connection.is_connected():
-            self.cursor.close()
-            self.connection.close()
-            print("MySQL connection is closed")
+    def __connect(self):
+        connection = pymysql.connect(host=self.host,
+                                        user=self.user,
+                                        password=self.password,
+                                        database=self.database,
+                                        cursorclass=pymysql.cursors.SSCursor)
+        self.connector = connection
             
     def is_query_modified_data(self, query):
         first_keyword = query.split(" ")[0]
@@ -57,33 +44,45 @@ class DatabaseConnection:
             return False
         else:
             return True
-        
 
     # Method to execute query
     def execute_query(self, query, all=False):
+        res = False
         try:
-            self.cursor.execute(query)
-            if self.is_query_modified_data(query):
-                self.connection.commit()
-                return True
-            else :
-                if all:
-                    rows = self.cursor.fetchall()
-                    return rows
-                else:
-                    row = self.cursor.fetchone()
-                    return row
-        except Error as e:
-            print(e)
-            return None
+            with self.connector.cursor() as cursor:
+                cursor.execute(query)
+                if self.is_query_modified_data(query):
+                    self.connector.commit()
+                    res = True
+                else :
+                    if all:
+                        rows = cursor.fetchall()
+                        res = rows
+                    else:
+                        row = cursor.fetchone()
+                        res = row
+        except:
+            res = False
+            print("Error: unable to execute query", query)
+        return res
+    
+    # Method to execute query
+    def execute_query_with_limit(self, query, limit=10):
+        res = False
+        try:
+            with self.connector.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchmany(limit)
+                res = rows
+        except:
+            res = False
+            print("Error: unable to execute query", query)
+        return res
+    
+    def __exit__(self, type, value, traceback):
+        self.connector.close()
 
-    # Method to fetch all rows with limit
-    def fetch_all_rows_with_limit(self, limit):
-        try:
-            self.cursor.execute("SELECT * FROM umls LIMIT %s", (limit,))
-            rows = self.cursor.fetchall()
-            return rows
-        except Error as e:
-            print(e)
+    def __exit__(self, type, value, traceback):
+        self.connector.close()
 
 db = DatabaseConnection(HOST, USER, PASSWORD, DATABASE)

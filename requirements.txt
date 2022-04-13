@@ -1,3 +1,6 @@
+# Database
+pymysql==1.0.2
+
 # UMLS Api requirements
 python-dotenv==0.20.0
 mysql-connector-python==8.0.28
