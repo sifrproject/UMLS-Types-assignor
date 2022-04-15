@@ -19,10 +19,10 @@ def print_description(label, sab, cui, sty_label, tui):
     print("tui", tui)
     print("\n")
 
-tui_indexes = {}
-all_tui = sty.get_all_tui()
-for index, item in enumerate(all_tui):
-    tui_indexes[item[0]] = index
+gui_indexes = {}
+all_gui = sty.get_all_gui()
+for index, item in enumerate(all_gui):
+    gui_indexes[item[1]] = item[0]
 
 res = meta.get_all_mrcon_with_sty(nb_data=500)
 count = 0
@@ -49,11 +49,6 @@ for (label, sab, cui, sty_label, tui) in res:
     if not definition:
         has_definition = False
 
-    if not tui in tui_indexes:
-        print("Error: tui not found")
-        print("tui", tui)
-        exit(84)
-
     row = [
         label,                                      # 0 Label -> is deleted in the end because it is not useful right now
         sab,                                        # 0 SAB -> is deleted in the end because it is not useful
@@ -65,12 +60,12 @@ for (label, sab, cui, sty_label, tui) in res:
         1 if has_definition else 0,                 # 5 Has definition
     ]
     X.append(row)
-    Y.append([tui, tui_indexes[tui]])
+    Y.append([tui, gui_indexes[tui]])
     count += 1
 
 print("Number of rows:", count)
 data = pd.DataFrame(X, columns=['Label', 'Source', 'CUI', 'Nb_Parents', 'Nb_Children', 'Has_Nb_Parents_And_Children', 'Definition', 'Has_Definition'])
-data = pd.concat([data, pd.DataFrame(Y, columns=['TUI', 'TUI_Index'])], axis=1)
+data = pd.concat([data, pd.DataFrame(Y, columns=['TUI', 'GUI'])], axis=1)
 
 ################ Nb_Parents and Nb_Children ###############
 

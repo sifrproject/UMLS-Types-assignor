@@ -179,3 +179,12 @@ class SemanticNetworkQueries:
         """
         query = "SELECT UI FROM SRDEF WHERE RT='STY' ORDER BY UI"
         return self.db.execute_query(query, all)
+    
+    def get_all_gui(self, all=True) -> List[Any]:
+        """Get all TUI
+        
+        Returns:
+            List[Any]: All TUI
+        """
+        query = "SELECT SGA, TUI FROM SRGRP ORDER BY TUI"
+        return self.db.execute_query(query, all)
