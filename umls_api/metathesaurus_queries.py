@@ -71,7 +71,7 @@ class MetathesaurusQueries:
             List[Tuple[str, str, str, str, str]]: All concepts with STY. Each concept is a tuple of (Label, SAB, CUI, STYLabel, TUI)
         """
         query = "SELECT a.str, c.sab, a.cui, b.sty, b.tui FROM MRCON a, MRSTY b, MRSO c WHERE LAT = '{}' AND a.cui=b.cui AND a.ts = 'P' AND a.stt = 'PF' AND a.lui=c.lui {}".format(
-            language.value, "" if nb_data == 0 else "LIMIT " + str(nb_data))
+            language.value, "" if nb_data == 0 else " LIMIT " + str(nb_data) + " OFFSET 10000")
         res = self.db.execute_query(query, all)
         if (res == None):
             return None
