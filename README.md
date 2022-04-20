@@ -7,7 +7,7 @@
 
 # UMLS Metathesaurus - Semantic Network Machine Learning
 
-[!![python-linter](.github/badges/lint-score.svg)](https://pylint.pycqa.org/en/latest/)
+[![python-linter](.github/badges/lint-score.svg)](https://pylint.pycqa.org/en/latest/)
 
 ## :book: Description :
 
