@@ -19,7 +19,7 @@ sty = SemanticNetworkQueries(db)
 # for row in res:
 #     print(row)
 #     print("\n")
-    
+
 # # Get last parent of STY by name
 # res = sty.get_last_parents_semantic_type_by_name("Clinical Attribute")
 # for row in res:
@@ -62,7 +62,7 @@ sty = SemanticNetworkQueries(db)
 #     print(row)
 #     print("\n")
 
-# # Get STY by TUI 
+# # Get STY by TUI
 # res = sty.get_semantic_type_by_tui("T191")
 # for row in res:
 #     print(row)

@@ -10,6 +10,7 @@ from lxml.html import fromstring
 uri = "https://utslogin.nlm.nih.gov"
 auth_endpoint = "/cas/v1/api-key"
 
+
 class Authentication:
 
     def __init__(self, apikey):
@@ -30,10 +31,10 @@ class Authentication:
 
     def getst(self):
         if self.tgt is None:
-          self.gettgt()              
+            self.gettgt()
         params = {'service': self.service}
         h = {"Content-type": "application/x-www-form-urlencoded",
-              "Accept": "text/plain", "User-Agent": "python"}
+             "Accept": "text/plain", "User-Agent": "python"}
         r = requests.post(self.tgt, data=params, headers=h)
         st = r.text
         self.tgt = None
