@@ -7,11 +7,11 @@
 
 # UMLS Metathesaurus - Semantic Network Machine Learning
 
-## Description :book: :
+## :book: Description :
 
 Machine Learning model that learns from Unified Medical Language System Metathesaurus (**UMLS Metathesaurus**) database tagging new graph in Semantic Network
 
-## How to use :rocket: :
+## :rocket: How to use :
 
 0- Complete the **.env** file with the following variables :
 
@@ -37,7 +37,7 @@ $ python get_data.py
 
 3- Use main.ipynb notebook to train the model
 
-## UMLS API :zap: :
+## :zap: UMLS API :
 
 We build our own UMLS API to get the data from UMLS Metathesaurus database. To use it, you need to install the UMLS database locally. You can download the database from [here](https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html) and install it following [these instructions](https://www.nlm.nih.gov/research/umls/implementation_resources/metamorphosys/help.html). Then, you need to import the `umls_api` python package.
 
