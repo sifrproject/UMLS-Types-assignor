@@ -2,3 +2,5 @@ __pycache__/
 .env
 .ipynb_checkpoints/
 .vscode/
+data.csv
+db_index

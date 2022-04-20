@@ -4,11 +4,10 @@
 # See https://documentation.uts.nlm.nih.gov/rest/authentication.html for full explanation
 
 import requests
-import lxml.html as lh
 from lxml.html import fromstring
 
-uri = "https://utslogin.nlm.nih.gov"
-auth_endpoint = "/cas/v1/api-key"
+URI = "https://utslogin.nlm.nih.gov"
+AUTH_ENDPOINT = "/cas/v1/api-key"
 
 
 class Authentication:
@@ -20,22 +19,28 @@ class Authentication:
         self.gettgt()
 
     def gettgt(self):
+        """Get the initial ticket granting ticket for future authentication"""
         params = {'apikey': self.apikey}
-        h = {"Content-type": "application/x-www-form-urlencoded",
+        headers = {"Content-type": "application/x-www-form-urlencoded",
              "Accept": "text/plain", "User-Agent": "python"}
-        r = requests.post(uri+auth_endpoint, data=params, headers=h)
-        response = fromstring(r.text)
+        response_request = requests.post(URI + AUTH_ENDPOINT, data=params, headers=headers)
+        response = fromstring(response_request.text)
         tgt = response.xpath('//form/@action')[0]
         tgt = tgt.replace("api-key", "tickets")
         self.tgt = tgt
 
-    def getst(self):
+    def getst(self) -> str:
+        """Get the service ticket for future authentication
+
+        Returns:
+            str: Service ticket
+        """
         if self.tgt is None:
             self.gettgt()
         params = {'service': self.service}
-        h = {"Content-type": "application/x-www-form-urlencoded",
+        headers = {"Content-type": "application/x-www-form-urlencoded",
              "Accept": "text/plain", "User-Agent": "python"}
-        r = requests.post(self.tgt, data=params, headers=h)
-        st = r.text
+        response_request = requests.post(self.tgt, data=params, headers=headers)
+        service_ticket = response_request.text
         self.tgt = None
-        return st
+        return service_ticket

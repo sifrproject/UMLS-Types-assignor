@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class Languages(Enum):
+    """Languages supported by the UMLS API."""
     ENG = "ENG"
     FRE = "FRE"
     SWE = "SWE"

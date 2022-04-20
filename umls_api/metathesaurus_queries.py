@@ -1,26 +1,32 @@
 import json
+import requests
 from typing import Any, List, Tuple
 from umls_api.authentication_umls_api import Authentication
 from umls_api.mysql_connection import DatabaseConnection
 from umls_api.languages import Languages
-import requests
 
 
 class MetathesaurusQueries:
+    """Metathesaurus API"""
 
-    # Constructor
-    def __init__(self, db: DatabaseConnection):
-        self.db = db
+    def __init__(self, database: DatabaseConnection):
+        """Constructor
+
+        Args:
+            database (DatabaseConnection): The database connection
+        """
+        self.db = database
         self.service = "https://uts-ws.nlm.nih.gov"
 
-    def get_all_names_from_cui(self, cui: str, language=Languages.ENG, all=True) -> List[Any]:
+    def get_all_names_from_cui(self, cui: str, language=Languages.ENG,
+                               all=True) -> List[Any]:
         """Returns all names of a concept given its CUI
 
         Returns:
             List[Any]: All names of the concept
         """
-        query = "SELECT SAB, STR, LAT FROM MRCONSO WHERE CUI = '{}' AND stt = 'PF' AND ts = 'P' AND lat='{}'".format(
-            cui, language.value)
+        query = "SELECT SAB, STR, LAT FROM MRCONSO WHERE CUI = '{}' AND stt = 'PF' AND ts = 'P' \
+            AND lat='{}'".format(cui, language.value)
         return self.db.execute_query(query, all)
 
     def get_all_semantic_types_from_name(self, name: str, all=True) -> List[Tuple[str, str]]:
@@ -44,6 +50,14 @@ class MetathesaurusQueries:
         return self.db.execute_query(query, all)
 
     def _sortTuple(self, tup: List[Tuple[str, str, str, str, str]]):
+        """Sorts a list of tuples alphabetically
+
+        Args:
+            tup (List[Tuple[str, str, str, str, str]]): The list of tuples to sort
+
+        Returns:
+            List[Tuple[str, str, str, str, str]]: The list of tuples sorted alphabetically
+        """
         # Getting the length of list
         # of tuples
         n = len(tup)
@@ -57,38 +71,51 @@ class MetathesaurusQueries:
         return tup
 
     def _removeDuplicated(self, tup: List[Tuple[str, str, str, str, str]]):
+        """Removes duplicated tuples
+
+        Args:
+            tup (List[Tuple[str, str, str, str, str]]): The list of tuples to remove duplicated
+
+        Returns:
+            List[Tuple[str, str, str, str, str]]: The list of tuples without duplicated
+        """
         # Check if 2 elements has the same source, CUI and TUI in a row
         for index, item in enumerate(tup):
-            if index > 0 and item[1] == tup[index - 1][1] and item[2] == tup[index - 1][2] and item[4] == tup[index - 1][4]:
+            if index > 0 and item[1] == tup[index - 1][1] and item[2] == tup[index - 1][2] \
+                    and item[4] == tup[index - 1][4]:
                 tup.pop(index)
         return tup
 
-    def get_all_mrcon_with_sty(self, nb_data=0, language=Languages.ENG, all=True, offset=None) -> List[Tuple[str, str, str, str, str]]:
+    def get_all_mrcon_with_sty(self, nb_data=0, language=Languages.ENG, all=True,
+                               offset=None) -> List[Tuple[str, str, str, str, str]]:
         """Returns all concepts with STY
 
         Returns:
-            List[Tuple[str, str, str, str, str]]: All concepts with STY. Each concept is a tuple of (Label, SAB, CUI, LUI, STYLabel, TUI)
+            List[Tuple[str, str, str, str, str]]: All concepts with STY. Each concept is a tuple \
+                of (Label, SAB, CUI, LUI, STYLabel, TUI)
         """
-        query = "SELECT a.str, c.sab, a.cui, a.lui, b.sty, b.tui FROM MRCON a, MRSTY b, MRSO c WHERE LAT = '{}' AND a.cui=b.cui AND a.ts = 'P' AND a.stt = 'PF' AND a.lui=c.lui".format(
-            language.value)
+        query = "SELECT a.str, c.sab, a.cui, a.lui, b.sty, b.tui FROM MRCON a, MRSTY b, MRSO c \
+            WHERE LAT = '{}' AND a.cui=b.cui AND a.ts = 'P' AND a.stt = 'PF' \
+                AND a.lui=c.lui".format(language.value)
         if nb_data != 0:
             query += " LIMIT " + str(nb_data)
             if offset:
                 query += " OFFSET " + str(offset)
         res = self.db.execute_query(query, all)
-        if (res is None):
+        if res is None:
             return None
-        alphabeticSortedTuples = self._sortTuple(res)
-        return self._removeDuplicated(alphabeticSortedTuples)
+        alphabetic_sorted_tuples = self._sortTuple(res)
+        return self._removeDuplicated(alphabetic_sorted_tuples)
 
-    def get_aui_from_cui_and_source_and_lui(self, cui: str, source: str, lui: str, language=Languages.ENG) -> str:
+    def get_aui_from_cui_and_source_and_lui(self, cui: str, source: str,
+                                            lui: str, language=Languages.ENG) -> str:
         """Returns the AUI of a concept given its CUI, source and LUI
 
         Returns:
             str: The AUI of the concept
         """
-        query = "SELECT AUI FROM MRCONSO WHERE CUI='{}' AND TS='P' AND LUI='{}' AND SAB='{}' AND LAT='{}' LIMIT 1".format(
-            cui, lui, source, language.value)
+        query = "SELECT AUI FROM MRCONSO WHERE CUI='{}' AND TS='P' AND LUI='{}' AND SAB='{}' \
+            AND LAT='{}' LIMIT 1".format(cui, lui, source, language.value)
         res = self.db.execute_query(query, False)
         if res:
             return res[0]
@@ -138,8 +165,7 @@ class MetathesaurusQueries:
             if res is None or len(res) == 0 or res[0] is None:
                 print("No definition found")
                 return None
-            else:
-                return res[0]
+            return res[0]
         return res[0]
 
     def get_nb_all_children_from_aui_and_umls_api(self, auth: Authentication, aui: str) -> int:
@@ -174,7 +200,8 @@ class MetathesaurusQueries:
             return -1
         return len(items['result'])
 
-    def get_nb_all_parents_from_cui_and_aui_and_source(self, cui: str, aui: str, source: str) -> int:
+    def get_nb_all_parents_from_cui_and_aui_and_source(self, cui: str, aui: str,
+                                                       source: str) -> int:
         """Returns the number of ancestors of a concept given its CUI, AUI and source
 
         Returns:

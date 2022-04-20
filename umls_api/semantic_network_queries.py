@@ -3,9 +3,15 @@ from umls_api.mysql_connection import DatabaseConnection
 
 
 class SemanticNetworkQueries:
-    # Constructor
-    def __init__(self, db: DatabaseConnection):
-        self.db = db
+    """Semantic Type API"""
+    
+    def __init__(self, database: DatabaseConnection):
+        """Constructor
+
+        Args:
+            database (DatabaseConnection): Database connection
+        """
+        self.db = database
 
     def get_all_semantic_types(self) -> List[Any]:
         """Get all semantic types
