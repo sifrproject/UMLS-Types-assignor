@@ -22,7 +22,7 @@ jobs:
     - name: Analysing the code with pylint
       id: linter
       run: |
-        pylint --fail-under=5 **/*.py > out.txt
+        pylint --fail-under=5 *.py > out.txt
         cat out.txt
         SCORE=`cat out.txt | grep -e '[0-9]*\.[0-9]*\/10' | cut -c 29-`
         echo "::set-output name=score::$SCORE"
