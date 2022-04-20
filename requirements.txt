@@ -1,9 +1,11 @@
 # Database
 pymysql==1.0.2
+mysql-connector-python==8.0.28
 
 # UMLS Api requirements
 python-dotenv==0.20.0
-mysql-connector-python==8.0.28
+lxml==4.8.0
+urllib3==1.25.8
 
 # Plottings
 matplotlib==3.5.1
