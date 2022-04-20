@@ -1,5 +1,5 @@
 import json
-import requests
+import urllib3
 from typing import Any, List, Tuple
 from umls_api.authentication_umls_api import Authentication
 from umls_api.mysql_connection import DatabaseConnection
@@ -17,6 +17,8 @@ class MetathesaurusQueries:
         """
         self.db = database
         self.service = "https://uts-ws.nlm.nih.gov"
+        # Creating a PoolManager instance for sending requests.
+        self.http = urllib3.PoolManager()
 
     def get_all_names_from_cui(self, cui: str, language=Languages.ENG,
                                all=True) -> List[Any]:
@@ -127,8 +129,8 @@ class MetathesaurusQueries:
         """
         query = {'ticket': auth.getst()}
         url = self.service + "/rest/content/current/CUI/" + cui + "/definitions"
-        r = requests.get(url, params=query)
-        items = json.loads(r.text)
+        resp = self.http.request("GET", url, fields=query)
+        items = json.loads(resp.data)
         if 'error' in items or not 'result' in items or len(items['result']) == 0:
             return None
         return items['result'][0]['rootSource']
@@ -172,8 +174,8 @@ class MetathesaurusQueries:
         query = {'ticket': auth.getst(), 'pageSize': 100}
         url = self.service + "/rest/content/current/AUI/" + \
             aui + "/descendants"
-        r = requests.get(url, params=query)
-        items = json.loads(r.text)
+        resp = self.http.request("GET", url, fields=query)
+        items = json.loads(resp.data)
         if 'error' in items or not 'result' in items or items['result'] is None:
             print(items)
             return -1
@@ -188,8 +190,8 @@ class MetathesaurusQueries:
         query = {'ticket': auth.getst(), 'pageSize': 100}
         url = self.service + "/rest/content/current/AUI/" + \
             aui + "/ancestors"
-        r = requests.get(url, params=query)
-        items = json.loads(r.text)
+        resp = self.http.request("GET", url, fields=query)
+        items = json.loads(resp.data)
         if 'error' in items or not 'result' in items or items['result'] is None:
             print(items)
             return -1
