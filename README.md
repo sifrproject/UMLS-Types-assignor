@@ -7,6 +7,8 @@
 
 # UMLS Metathesaurus - Semantic Network Machine Learning
 
+[!![python-linter](.github/badges/lint-score.svg)](https://pylint.pycqa.org/en/latest/)
+
 ## :book: Description :
 
 Machine Learning model that learns from Unified Medical Language System Metathesaurus (**UMLS Metathesaurus**) database tagging new graph in Semantic Network
