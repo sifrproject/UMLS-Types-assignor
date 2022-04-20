@@ -55,28 +55,44 @@ class MetathesaurusQueries:
                     tup[j], tup[j + 1] = tup[j + 1], tup[j]
 
         return tup
-    
+
     def _removeDuplicated(self, tup: List[Tuple[str, str, str, str, str]]):
         # Check if 2 elements has the same source, CUI and TUI in a row
         for index, item in enumerate(tup):
             if index > 0 and item[1] == tup[index - 1][1] and item[2] == tup[index - 1][2] and item[4] == tup[index - 1][4]:
                 tup.pop(index)
         return tup
-            
 
-    def get_all_mrcon_with_sty(self, nb_data=0, language=Languages.ENG, all=True) -> List[Tuple[str, str, str, str, str]]:
+    def get_all_mrcon_with_sty(self, nb_data=0, language=Languages.ENG, all=True, offset=None) -> List[Tuple[str, str, str, str, str]]:
         """Returns all concepts with STY
 
         Returns:
-            List[Tuple[str, str, str, str, str]]: All concepts with STY. Each concept is a tuple of (Label, SAB, CUI, STYLabel, TUI)
+            List[Tuple[str, str, str, str, str]]: All concepts with STY. Each concept is a tuple of (Label, SAB, CUI, LUI, STYLabel, TUI)
         """
-        query = "SELECT a.str, c.sab, a.cui, b.sty, b.tui FROM MRCON a, MRSTY b, MRSO c WHERE LAT = '{}' AND a.cui=b.cui AND a.ts = 'P' AND a.stt = 'PF' AND a.lui=c.lui {}".format(
-            language.value, "" if nb_data == 0 else " LIMIT " + str(nb_data) + " OFFSET 10000")
+        query = "SELECT a.str, c.sab, a.cui, a.lui, b.sty, b.tui FROM MRCON a, MRSTY b, MRSO c WHERE LAT = '{}' AND a.cui=b.cui AND a.ts = 'P' AND a.stt = 'PF' AND a.lui=c.lui".format(
+            language.value)
+        if nb_data != 0:
+            query += " LIMIT " + str(nb_data)
+            if offset:
+                query += " OFFSET " + str(offset)
         res = self.db.execute_query(query, all)
-        if (res == None):
+        if (res is None):
             return None
         alphabeticSortedTuples = self._sortTuple(res)
         return self._removeDuplicated(alphabeticSortedTuples)
+
+    def get_aui_from_cui_and_source_and_lui(self, cui: str, source: str, lui: str, language=Languages.ENG) -> str:
+        """Returns the AUI of a concept given its CUI, source and LUI
+
+        Returns:
+            str: The AUI of the concept
+        """
+        query = "SELECT AUI FROM MRCONSO WHERE CUI='{}' AND TS='P' AND LUI='{}' AND SAB='{}' AND LAT='{}' LIMIT 1".format(
+            cui, lui, source, language.value)
+        res = self.db.execute_query(query, False)
+        if res:
+            return res[0]
+        return None
 
     def get_source_from_cui(self, cui: str, auth: Authentication) -> str:
         """Returns the source of a concept given its CUI
@@ -90,8 +106,7 @@ class MetathesaurusQueries:
         items = json.loads(r.text)
         if 'error' in items or not 'result' in items or len(items['result']) == 0:
             return None
-        else:
-            return items['result'][0]['rootSource']
+        return items['result'][0]['rootSource']
 
     def get_code_from_cui_and_source(self, cui: str, source: str) -> str:
         """Returns the code of a concept given its CUI and source
@@ -102,48 +117,10 @@ class MetathesaurusQueries:
         query = "SELECT CODE FROM MRSAT WHERE CUI = '{}' AND SAB = '{}' LIMIT 1".format(
             cui, source)
         res = self.db.execute_query(query, False)
-        if res == None or len(res) == 0 or res[0] == None:
+        if res is None or len(res) == 0 or res[0] is None:
             print("No code found")
             return None
-        else:
-            return res[0]
-
-    def get_nb_all_parents_from_cui_from_umls_api(self, auth: Authentication, source: str, code: str) -> int:
-        """Returns the number of ancestors of a concept given its source and code
-
-        Returns:
-            int: The number of ancestors of the concept
-        """
-        query = {'ticket': auth.getst(), 'pageSize': 100}
-        url = self.service + "/rest/content/current/source/" + \
-            source + "/" + code + "/ancestors"
-        r = requests.get(url, params=query)
-        items = json.loads(r.text)
-        if 'error' in items or not 'result' in items or items['result'] == None:
-            print("Error: get_nb_all_parents_from_cui_from_umls_api")
-            print(items)
-            return 0
-        else:
-            # Count elements in items['result'] that have 'parents' key not equal to None
-            return len([x for x in items['result'] if x['parents'] != None and x['parents'] != 'NONE'])
-
-    def get_nb_all_children_from_cui_from_umls_api(self, auth: Authentication, source: str, code: str) -> int:
-        """Returns the number of descendants of a concept given its source and code
-
-        Returns:
-            int: The number of descendants of the concept
-        """
-        query = {'ticket': auth.getst(), 'pageSize': 100}
-        url = self.service + "/rest/content/current/source/" + \
-            source + "/" + code + "/descendants"
-        r = requests.get(url, params=query)
-        items = json.loads(r.text)
-        if 'error' in items or not 'result' in items or items['result'] == None:
-            print("Error: get_nb_all_children_from_cui_from_umls_api")
-            print(items)
-            return 0
-        else:
-            return len(items['result'])
+        return res[0]
 
     def get_definition_from_cui_and_source(self, cui: str, source: str) -> str:
         """Returns the definition of a concept given its CUI and source
@@ -154,14 +131,56 @@ class MetathesaurusQueries:
         query = "SELECT DEF FROM MRDEF WHERE CUI = '{}' AND SAB = '{}' LIMIT 1".format(
             cui, source)
         res = self.db.execute_query(query, False)
-        if res == None or len(res) == 0 or res[0] == None:
+        if res is None or len(res) == 0 or res[0] is None:
             query = "SELECT DEF FROM MRDEF WHERE CUI = '{}' AND SAB = 'MSH' LIMIT 1".format(
                 cui)
             res = self.db.execute_query(query, False)
-            if res == None or len(res) == 0 or res[0] == None:
+            if res is None or len(res) == 0 or res[0] is None:
                 print("No definition found")
                 return None
             else:
                 return res[0]
-        else:
-            return res[0]
+        return res[0]
+
+    def get_nb_all_children_from_aui_and_umls_api(self, auth: Authentication, aui: str) -> int:
+        """Returns the number of descendants of a concept given its AUI and UMLS API
+
+        Returns:
+            int: The number of descendants of the concept
+        """
+        query = {'ticket': auth.getst(), 'pageSize': 100}
+        url = self.service + "/rest/content/current/AUI/" + \
+            aui + "/descendants"
+        r = requests.get(url, params=query)
+        items = json.loads(r.text)
+        if 'error' in items or not 'result' in items or items['result'] is None:
+            print(items)
+            return -1
+        return len(items['result'])
+
+    def get_nb_all_parents_from_aui_and_umls_api(self, auth: Authentication, aui: str) -> int:
+        """Returns the number of descendants of a concept given its AUI and UMLS API
+
+        Returns:
+            int: The number of descendants of the concept
+        """
+        query = {'ticket': auth.getst(), 'pageSize': 100}
+        url = self.service + "/rest/content/current/AUI/" + \
+            aui + "/ancestors"
+        r = requests.get(url, params=query)
+        items = json.loads(r.text)
+        if 'error' in items or not 'result' in items or items['result'] is None:
+            print(items)
+            return -1
+        return len(items['result'])
+
+    def get_nb_all_parents_from_cui_and_aui_and_source(self, cui: str, aui: str, source: str) -> int:
+        """Returns the number of ancestors of a concept given its CUI, AUI and source
+
+        Returns:
+            int: The number of ancestors of the concept
+        """
+        query = "SELECT PTR from MRHIER WHERE CUI='{}' AND SAB='{}' AND AUI='{}' LIMIT 1".format(
+            cui, source, aui)
+        res = self.db.execute_query(query, False)
+        return len(res[0].split("."))
