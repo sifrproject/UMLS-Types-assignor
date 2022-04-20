@@ -1,6 +1,6 @@
 import os
-from dotenv import load_dotenv
 from pathlib import Path
+from dotenv import load_dotenv
 
 import pymysql
 import pymysql.cursors
@@ -15,6 +15,7 @@ PASSWORD = os.getenv('PASSWORD')
 DATABASE = os.getenv('DATABASE')
 UMLS_API_KEY = os.getenv('UMLS_API_KEY')
 
+
 def is_query_modified_data(query: str) -> bool:
     """ Check if query is modifying data
 
@@ -25,13 +26,14 @@ def is_query_modified_data(query: str) -> bool:
         bool: True if query is modifying data, False otherwise
     """
     first_keyword = query.split(" ")[0]
-    if (first_keyword == "SELECT" or first_keyword == "with"):
+    if first_keyword in ('SELECT', 'with'):
         return False
     return True
 
+
 class DatabaseConnection:
     """Class to manage database connection"""
-    
+
     def __init__(self, host: str, user: str, password: str, database: str):
         """ Constructor
 

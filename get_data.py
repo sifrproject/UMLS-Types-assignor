@@ -49,8 +49,9 @@ def save_to_csv(X_data: list, Y_data: list, db_index: int):
         Y_data (list): Y data
         db_index (int): Index of the database
     """
-    data = pd.DataFrame(X_data, columns=['Label', 'Source', 'CUI', 'Nb_Parents', 'Nb_Children',
-                                         'Nb_Parents_Children_Known', 'Definition', 'Has_Definition'])
+    data = pd.DataFrame(X_data, columns=['Label', 'Source', 'CUI',
+                                         'Nb_Parents', 'Nb_Children', 'Nb_Parents_Children_Known',
+                                         'Definition', 'Has_Definition'])
     data = pd.concat(
         [data, pd.DataFrame(Y_data, columns=['TUI', 'GUI'])], axis=1)
     # Save X and Y in the same csv file

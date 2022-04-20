@@ -31,23 +31,23 @@ class MetathesaurusQueries:
             AND ts = 'P' AND lat='{language.value}'"
         return self.db.execute_query(query, all)
 
-    def get_all_semantic_types_from_name(self, name: str, all=True) -> List[Tuple[str, str]]:
+    def get_all_semantic_types_from_name(self, name: str, all_rows=True) -> List[Tuple[str, str]]:
         """Returns all STY of a concept given its name
 
         Returns:
             List[(str, str)]: All STY of the concept. Each STY is a tuple of (Label, STY)
         """
         query = f"SELECT sty, tui FROM MRCON a, MRSTY b WHERE a.cui = b.cui AND str = '{name}'"
-        return self.db.execute_query(query, all)
+        return self.db.execute_query(query, all_rows)
 
-    def get_all_mrconso(self, language=Languages.ENG, all=True) -> List[Any]:
+    def get_all_mrconso(self, language=Languages.ENG, all_rows=True) -> List[Any]:
         """Returns all concepts
 
         Returns:
             List[Any]: All concepts
         """
         query = f"SELECT * FROM MRCONSO WHERE LAT = '{language.value}' <> 0"
-        return self.db.execute_query(query, all)
+        return self.db.execute_query(query, all_rows)
 
     def _sortTuple(self, tup: List[Tuple[str, str, str, str, str]]):
         """Sorts a list of tuples alphabetically
@@ -86,7 +86,7 @@ class MetathesaurusQueries:
                 tup.pop(index)
         return tup
 
-    def get_all_mrcon_with_sty(self, nb_data=0, language=Languages.ENG, all=True,
+    def get_all_mrcon_with_sty(self, nb_data=0, language=Languages.ENG, all_rows=True,
                                offset=None) -> List[Tuple[str, str, str, str, str]]:
         """Returns all concepts with STY
 
@@ -101,7 +101,7 @@ class MetathesaurusQueries:
             query += " LIMIT " + str(nb_data)
             if offset:
                 query += " OFFSET " + str(offset)
-        res = self.db.execute_query(query, all)
+        res = self.db.execute_query(query, all_rows)
         if res is None:
             return None
         alphabetic_sorted_tuples = self._sortTuple(res)
