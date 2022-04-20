@@ -1,8 +1,6 @@
-from itertools import count
 import os
 import sys
 import timeit
-from mysqlx import Auth
 from numpy import NaN
 import pandas as pd
 from umls_api.mysql_connection import db, UMLS_API_KEY
@@ -52,8 +50,9 @@ def save_to_csv(X_data: list, Y_data: list, db_index: int):
         db_index (int): Index of the database
     """
     data = pd.DataFrame(X_data, columns=['Label', 'Source', 'CUI', 'Nb_Parents', 'Nb_Children',
-                                    'Nb_Parents_Children_Known', 'Definition', 'Has_Definition'])
-    data = pd.concat([data, pd.DataFrame(Y_data, columns=['TUI', 'GUI'])], axis=1)
+                                         'Nb_Parents_Children_Known', 'Definition', 'Has_Definition'])
+    data = pd.concat(
+        [data, pd.DataFrame(Y_data, columns=['TUI', 'GUI'])], axis=1)
     # Save X and Y in the same csv file
     if db_index > 0:
         data.to_csv('data.csv', mode="a", index=False, header=False)
@@ -96,10 +95,10 @@ def main():
 
     gui_indexes = {}
     all_gui = sty.get_all_gui()
-    for index, item in enumerate(all_gui):
+    for item in all_gui:
         gui_indexes[item[1]] = item[0]
 
-    res = meta.get_all_mrcon_with_sty(nb_data=100, offset=db_index)
+    res = meta.get_all_mrcon_with_sty(nb_data=300, offset=db_index)
     count = 0
     X_data = []
     Y_data = []

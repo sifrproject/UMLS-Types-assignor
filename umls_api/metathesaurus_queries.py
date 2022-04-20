@@ -25,8 +25,8 @@ class MetathesaurusQueries:
         Returns:
             List[Any]: All names of the concept
         """
-        query = "SELECT SAB, STR, LAT FROM MRCONSO WHERE CUI = '{}' AND stt = 'PF' AND ts = 'P' \
-            AND lat='{}'".format(cui, language.value)
+        query = f"SELECT SAB, STR, LAT FROM MRCONSO WHERE CUI = '{cui}' AND stt = 'PF' \
+            AND ts = 'P' AND lat='{language.value}'"
         return self.db.execute_query(query, all)
 
     def get_all_semantic_types_from_name(self, name: str, all=True) -> List[Tuple[str, str]]:
@@ -35,8 +35,7 @@ class MetathesaurusQueries:
         Returns:
             List[(str, str)]: All STY of the concept. Each STY is a tuple of (Label, STY)
         """
-        query = "SELECT sty, tui FROM MRCON a, MRSTY b WHERE a.cui = b.cui AND str = '{}'".format(
-            name)
+        query = f"SELECT sty, tui FROM MRCON a, MRSTY b WHERE a.cui = b.cui AND str = '{name}'"
         return self.db.execute_query(query, all)
 
     def get_all_mrconso(self, language=Languages.ENG, all=True) -> List[Any]:
@@ -45,8 +44,7 @@ class MetathesaurusQueries:
         Returns:
             List[Any]: All concepts
         """
-        query = "SELECT * FROM MRCONSO WHERE LAT = '{}' <> 0;".format(
-            language.value)
+        query = f"SELECT * FROM MRCONSO WHERE LAT = '{language.value}' <> 0"
         return self.db.execute_query(query, all)
 
     def _sortTuple(self, tup: List[Tuple[str, str, str, str, str]]):
@@ -94,9 +92,9 @@ class MetathesaurusQueries:
             List[Tuple[str, str, str, str, str]]: All concepts with STY. Each concept is a tuple \
                 of (Label, SAB, CUI, LUI, STYLabel, TUI)
         """
-        query = "SELECT a.str, c.sab, a.cui, a.lui, b.sty, b.tui FROM MRCON a, MRSTY b, MRSO c \
-            WHERE LAT = '{}' AND a.cui=b.cui AND a.ts = 'P' AND a.stt = 'PF' \
-                AND a.lui=c.lui".format(language.value)
+        query = f"SELECT a.str, c.sab, a.cui, a.lui, b.sty, b.tui FROM MRCON a, MRSTY b, MRSO c \
+            WHERE LAT = '{language.value}' AND a.cui=b.cui AND a.ts = 'P' AND a.stt = 'PF' \
+                AND a.lui=c.lui"
         if nb_data != 0:
             query += " LIMIT " + str(nb_data)
             if offset:
@@ -114,8 +112,8 @@ class MetathesaurusQueries:
         Returns:
             str: The AUI of the concept
         """
-        query = "SELECT AUI FROM MRCONSO WHERE CUI='{}' AND TS='P' AND LUI='{}' AND SAB='{}' \
-            AND LAT='{}' LIMIT 1".format(cui, lui, source, language.value)
+        query = f"SELECT AUI FROM MRCONSO WHERE CUI='{cui}' AND TS='P' AND LUI='{lui}' \
+            AND SAB='{source}' AND LAT='{language.value}' LIMIT 1"
         res = self.db.execute_query(query, False)
         if res:
             return res[0]
@@ -141,8 +139,7 @@ class MetathesaurusQueries:
         Returns:
             str: The code of the concept
         """
-        query = "SELECT CODE FROM MRSAT WHERE CUI = '{}' AND SAB = '{}' LIMIT 1".format(
-            cui, source)
+        query = f"SELECT CODE FROM MRSAT WHERE CUI = '{cui}' AND SAB = '{source}' LIMIT 1"
         res = self.db.execute_query(query, False)
         if res is None or len(res) == 0 or res[0] is None:
             print("No code found")
@@ -155,12 +152,10 @@ class MetathesaurusQueries:
         Returns:
             str: The definition of the concept
         """
-        query = "SELECT DEF FROM MRDEF WHERE CUI = '{}' AND SAB = '{}' LIMIT 1".format(
-            cui, source)
+        query = f"SELECT DEF FROM MRDEF WHERE CUI = '{cui}' AND SAB = '{source}' LIMIT 1"
         res = self.db.execute_query(query, False)
         if res is None or len(res) == 0 or res[0] is None:
-            query = "SELECT DEF FROM MRDEF WHERE CUI = '{}' AND SAB = 'MSH' LIMIT 1".format(
-                cui)
+            query = "SELECT DEF FROM MRDEF WHERE CUI = '{cui}' AND SAB = 'MSH' LIMIT 1"
             res = self.db.execute_query(query, False)
             if res is None or len(res) == 0 or res[0] is None:
                 print("No definition found")
@@ -207,7 +202,7 @@ class MetathesaurusQueries:
         Returns:
             int: The number of ancestors of the concept
         """
-        query = "SELECT PTR from MRHIER WHERE CUI='{}' AND SAB='{}' AND AUI='{}' LIMIT 1".format(
-            cui, source, aui)
+        query = f"SELECT PTR from MRHIER WHERE CUI='{cui}' AND SAB='{source}' \
+            AND AUI='{aui}' LIMIT 1"
         res = self.db.execute_query(query, False)
         return len(res[0].split("."))
