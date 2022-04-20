@@ -10,5 +10,5 @@ lemmitization: True
 # Word2Vec
 vector_size: 300
 window: 8
-epochs: 30
+w2v_epochs: 30
 sequence_length: 50
