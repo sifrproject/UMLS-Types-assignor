@@ -1,13 +1,20 @@
 name: Pylint
 
-on: [push]
+on: 
+  push:
+    branches: [ main ]
+    paths:
+      - "**.py"
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "**.py"
 
 jobs:
-  build:
+  pylint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8"]
+    outputs:
+      score: ${{ steps.linter.outputs.score }}
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -19,9 +26,61 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pylint
-        python pip install git+ https://github.com/apmechev/pylint-badge
     - name: Analysing the code with pylint
       run: |
-        pylint-badge script.py
-        pylint $(git ls-files '*.py')
+        pylint $(git ls-files '*.py') > out.txt
+        cat out.txt
+        SCORE=`cat out.txt | grep -e '[0-9]*\.[0-9]*\/10' | cut -c 29-`
+        echo "::set-output name=score::$SCORE"
+  badge:
+    runs-on: ubuntu-latest
+    needs: pylint
+
+    steps: 
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract branch name
+        id: extract_branch
+        run: |
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+
+      - name: Make folder to hold badge
+        id: folder
+        run: |
+          mkdir -p "${BADGE_PATH%/*}"
+          echo "##[set-output name=path;]${BADGE_PATH}"
+        env:
+          BADGE_PATH: .github/badges/lint-score.svg
         
+      - name: Badge Action
+        uses: emibcn/badge-action@v1.2.4
+        with:
+          label: "Pylint score"
+          status: ${{ needs.pylint.outputs.score }}
+          color: 'pink'
+          path: ${{ steps.folder.outputs.path }}
+
+      - name: Upload badge as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: badge
+          path: ${{ steps.folder.outputs.path }}
+          if-no-files-found: error
+
+      - name: Commit badge
+        continue-on-error: true
+        env:
+          BADGE: ${{ steps.folder.outputs.path }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add "${BADGE}"
+          git commit -m "docs: add/update badge"
+
+      - name: Push badge commit
+        uses: ad-m/github-push-action@master
+        if: ${{ success() }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.folder.outputs.branch }}
