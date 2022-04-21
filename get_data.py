@@ -99,7 +99,7 @@ def main():
     for item in all_gui:
         gui_indexes[item[1]] = item[0]
 
-    res = meta.get_all_mrcon_with_sty(nb_data=300, offset=db_index)
+    res = meta.get_all_mrcon_with_sty(nb_data=1000, offset=db_index)
     count = 0
     X_data = []
     Y_data = []

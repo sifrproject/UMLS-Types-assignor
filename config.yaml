@@ -12,3 +12,73 @@ vector_size: 300
 window: 8
 w2v_epochs: 30
 sequence_length: 50
+
+# Numerical data
+numerical_data_shape: 4
+
+# Neural network settings
+neural_network:
+  word_embedding:
+    steps:
+      - name: "Input-Word-Embedding"
+        type: "Input"
+        input_shape: 50 # sequence_length
+      - name: "Embedding"
+        type: "Embedding"
+        input_shape: None # Len of vocabulary
+        imput_length: 50 # sequence_length
+        output_shape: 300 # vector_size
+        weights: "embeddings"
+        trainable: False
+      - name: "LSTM-1"
+        type: "LSTM"
+        units: 50 # sequence_length
+        dropout: 0.2
+        return_sequences: True
+      - name: "LSTM-2"
+        type: "LSTM"
+        units: 50 # sequence_length
+        dropout: 0.2
+        return_sequences: False
+      - name: "Dense-1-WE"
+        type: "Dense"
+        units: 64
+        activation: "relu"
+  multi_layer_perception:
+    steps:
+      - name: "Input-Multi-Layer-Perceptron"
+        type: "Input"
+        input_shape: 4 # numerical_data_shape
+      - name: "Dense-1-MLP"
+        type: "Dense"
+        units: 8
+        activation: "relu"
+      - name: "Dense-2-MLP"
+        type: "Dense"
+        units: 4
+        activation: "relu"
+  concatenate:
+    steps:
+      - name: "Dense-1"
+        type: "Dense"
+        units: 4
+        activation: "relu"
+  out:
+    name: "Final-Dense"
+    type: "Dense"
+    units: 'data[config["y_classificaton_column"]].nunique()'
+    activation: "softmax"
+  optimizer:
+    name: "adam"
+    learning_rate: 0.001
+    decay: 0.0
+    momentum: 0.0
+    nesterov: False
+    clipnorm: 0.0
+    clipvalue: 0.0
+    beta_1: 0.9
+    beta_2: 0.999
+    epsilon: 1e-08
+    amsgrad: False
+  loss: "sparse_categorical_crossentropy"
+  metrics: ["accuracy"]
