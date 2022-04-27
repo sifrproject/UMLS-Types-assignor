@@ -1,4 +1,5 @@
 # Initial settings
+verbose: true
 y_classificaton_column: "GUI" # Column which contains the classification result
 drop_columns: []
 test_size: 0.3 # Percentage of data used for testing
@@ -8,13 +9,13 @@ stemming: False
 lemmitization: True
 
 # Word2Vec
-vector_size: 300
-window: 8
-w2v_epochs: 30
-sequence_length: 50
+vector_size: 500 # vector_size
+window: 10 # window
+w2v_epochs: 35
+sequence_length: 50 # sequence_length
 
 # Numerical data
-numerical_data_shape: 4
+numerical_data_shape: 4 # numerical_data_shape
 
 # Neural network settings
 neural_network:
@@ -27,7 +28,7 @@ neural_network:
         type: "Embedding"
         input_shape: None # Len of vocabulary
         imput_length: 50 # sequence_length
-        output_shape: 300 # vector_size
+        output_shape: 500 # vector_size
         weights: "embeddings"
         trainable: False
       - name: "LSTM-1"
@@ -42,7 +43,7 @@ neural_network:
         return_sequences: False
       - name: "Dense-1-WE"
         type: "Dense"
-        units: 64
+        units: 220
         activation: "relu"
   multi_layer_perception:
     steps:
@@ -61,7 +62,7 @@ neural_network:
     steps:
       - name: "Dense-1"
         type: "Dense"
-        units: 4
+        units: 32
         activation: "relu"
   out:
     name: "Final-Dense"
@@ -70,15 +71,18 @@ neural_network:
     activation: "softmax"
   optimizer:
     name: "adam"
-    learning_rate: 0.001
-    decay: 0.0
-    momentum: 0.0
-    nesterov: False
-    clipnorm: 0.0
-    clipvalue: 0.0
-    beta_1: 0.9
-    beta_2: 0.999
-    epsilon: 1e-08
-    amsgrad: False
+    learning_rate: 0.001 # Unused
+    decay: 0.0 # Unused
+    momentum: 0.0 # Unused
+    nesterov: False # Unused
+    clipnorm: 0.0 # Unused
+    clipvalue: 0.0 # Unused
+    beta_1: 0.9 # Unused
+    beta_2: 0.999 # Unused
+    epsilon: 1e-08 # Unused
+    amsgrad: False # Unused
   loss: "sparse_categorical_crossentropy"
-  metrics: ["accuracy"]
+  metrics: [] # Unused
+  batch_size: 64
+  epochs: 30
+  shuffle: True

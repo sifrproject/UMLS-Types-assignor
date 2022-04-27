@@ -4,3 +4,9 @@ __pycache__/
 .vscode/
 data.csv
 db_index
+analyse.csv
+preprocessed_data.csv
+results.png
+training.png
+mlruns
+artefact/models

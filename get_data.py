@@ -1,3 +1,5 @@
+# 1st Step : Get the data from the UMLS
+
 import os
 import sys
 import timeit
@@ -29,14 +31,14 @@ def print_description(concept_label: str, concept_sab: str, concept_cui: str,
     print("\n")
 
 
-def save_index_db(count: int, db_index_path="db_index"):
+def save_index_db(count: int, db_index_path="artefact/db_index"):
     """Save the index of the database in a file
 
     Args:
         count (int): Count of the database
         db_index_path (str, optional): Path of the file. Defaults to "db_index".
     """
-    text_file = open(db_index_path, "w+")
+    text_file = open(db_index_path, "w+", encoding='utf8')
     text_file.write(str(count))
     text_file.close()
 
@@ -56,31 +58,19 @@ def save_to_csv(X_data: list, Y_data: list, db_index: int):
         [data, pd.DataFrame(Y_data, columns=['TUI', 'GUI'])], axis=1)
     # Save X and Y in the same csv file
     if db_index > 0:
-        data.to_csv('data.csv', mode="a", index=False, header=False)
+        data.to_csv('artefact/data.csv', mode="a", index=False, header=False)
     else:
-        data.to_csv('data.csv', index=False)
+        data.to_csv('artefact/data.csv', index=False)
 
 
-def main():
-    """Main function"""
+def generate_source_data(limit: int, verbose=False):
+    """generate_source_data function"""
     db_index = None
-    db_index_path = "db_index"
+    db_index_path = "artefact/db_index"
 
-    if len(sys.argv) > 1 and sys.argv[1] == "--reset":
-        # Reset db_index file
-        save_index_db(0, db_index_path)
-        # remove data.csv file
-        if os.path.exists('data.csv'):
-            os.remove('data.csv')
-        sys.exit(0)
-
-    if len(sys.argv) > 1 and sys.argv[1] == "--help":
-        print("Usage:")
-        print("\tpython3 get_data.py [--help] [--index]")
-        sys.exit(0)
-    elif len(sys.argv) > 1 and sys.argv[1] == "--index":
+    if limit:
         if os.path.isfile(db_index_path):
-            text_file = open(db_index_path, "r")
+            text_file = open(db_index_path, "r", encoding='utf8')
             db_index = int(text_file.read())
             text_file.close()
             print("Index Database: ", db_index)
@@ -99,13 +89,31 @@ def main():
     for item in all_gui:
         gui_indexes[item[1]] = item[0]
 
-    res = meta.get_all_mrcon_with_sty(nb_data=1000, offset=db_index)
+    # res = meta.get_all_unique_terms() # ! delete me
+    # deleteme = []
+    # # Save res in a csv file
+    # for i in res:
+    #     deleteme.append([
+    #         i[0],
+    #         i[1],
+    #         i[2],
+    #         i[3],
+    #         i[4],
+    #         gui_indexes[i[4]],
+    #     ])
+    # data = pd.DataFrame(deleteme, columns=['CUI', 'AUI', 'SAB', 'STR', 'TUI', 'GUI'])
+    # data.to_csv('artefact/analyse.csv', index=False)
+
+    # exit(0)
+
+    res = meta.get_all_mrcon_with_sty(nb_data=limit, offset=db_index)
     count = 0
     X_data = []
     Y_data = []
     try:
         for (label, sab, cui, lui, sty_label, tui) in res:
-            print_description(label, sab, cui, sty_label, tui)
+            if verbose:
+                print_description(label, sab, cui, sty_label, tui)
 
             source = sab
             aui = meta.get_aui_from_cui_and_source_and_lui(cui, source, lui)
@@ -113,10 +121,12 @@ def main():
             nb_children = -1
             if aui:
                 nb_parents_children_known = 1
-                print("Getting number of ancestors...")
+                if verbose:
+                    print("Getting number of ancestors...")
                 nb_parents = meta.get_nb_all_parents_from_aui_and_umls_api(
                     auth, aui)
-                print("Getting number of descendants...")
+                if verbose:
+                    print("Getting number of descendants...")
                 nb_children = meta.get_nb_all_children_from_aui_and_umls_api(
                     auth, aui)
                 if nb_children == -1 and nb_parents == -1:
@@ -127,9 +137,11 @@ def main():
             else:
                 nb_parents_children_known = 0
 
-            print("Getting definition...")
+            if verbose:
+                print("Getting definition...")
             definition = meta.get_definition_from_cui_and_source(cui, source)
-            print("Done.")
+            if verbose:
+                print("Done.")
             has_definition = True
             if not definition:
                 has_definition = False
@@ -147,22 +159,18 @@ def main():
             X_data.append(row)
             Y_data.append([tui, gui_indexes[tui]])
             count += 1
-            print("\n")
+            if verbose:
+                print("\n")
     except KeyboardInterrupt:
         print("Quitting...")
         save_to_csv(X_data, Y_data, db_index)
         save_index_db(db_index + count)
         sys.exit(0)
 
-    print("Number of rows:", count)
-
     save_to_csv(X_data, Y_data, db_index)
     save_index_db(db_index + count)
 
     stop = timeit.default_timer()
 
-    print('Time: ', stop - start)
-
-
-if __name__ == '__main__':
-    main()
+    print(f'Generate source data in {stop - start} seconds')
+    return (X_data, Y_data)

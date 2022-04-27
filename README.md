@@ -31,13 +31,37 @@ UMLS_API_KEY=<your_api_key>
 $ pip install -r requirements.txt
 ```
 
-2- Generate **data.csv** file
+2- Launch pipeline
 
 ```bash
-$ python get_data.py
+$ python main.py
 ```
 
-3- Use main.ipynb notebook to train the model
+*You can use flags to customize the args in the pipeline*
+
+```bash
+$ python main.py -h
+
+> usage: main.py [-h] [--verbose] [--only_source ONLY_SOURCE] [--only_preprocess ONLY_PREPROCESS]
+               [--only_training ONLY_TRAINING] [--limit LIMIT]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --verbose             Active verbose mode.
+  --only_source ONLY_SOURCE
+                        Pipeline launchs only the generation of the source data.
+  --only_preprocess ONLY_PREPROCESS
+                        Pipeline launchs only the preprocess of the source data.
+  --only_training ONLY_TRAINING
+                        Pipeline launchs only the training of the preprocessed data.
+  --limit LIMIT         Limit of the source data number generated.
+```
+
+3- Use MlFlow UI to visualize data in [**localhost:5000**](http://127.0.0.1:5000/)
+
+```
+$ mlflow ui
+```
 
 ## :zap: UMLS API :
 
@@ -47,4 +71,4 @@ We also use the [UMLS REST API](https://www.nlm.nih.gov/research/umls/licensedco
 
 ## :floppy_disk: Model used :
 
-![Keras Visualization model](./model_plot.png)
+![Keras Visualization model](./artefact/model_plot.png)

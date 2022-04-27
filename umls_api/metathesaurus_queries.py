@@ -6,6 +6,45 @@ from umls_api.mysql_connection import DatabaseConnection
 from umls_api.languages import Languages
 
 
+def sort_tuple(tup: List[Tuple[str, str, str, str, str]]):
+    """Sorts a list of tuples alphabetically
+
+    Args:
+        tup (List[Tuple[str, str, str, str, str]]): The list of tuples to sort
+
+    Returns:
+        List[Tuple[str, str, str, str, str]]: The list of tuples sorted alphabetically
+    """
+    # Getting the length of list
+    # of tuples
+    n = len(tup)
+
+    for i in range(n):
+        for j in range(n-i-1):
+
+            if tup[j][1] > tup[j + 1][1]:
+                tup[j], tup[j + 1] = tup[j + 1], tup[j]
+
+    return tup
+
+
+def remove_duplicated(tup: List[Tuple[str, str, str, str, str]]):
+    """Removes duplicated tuples
+
+    Args:
+        tup (List[Tuple[str, str, str, str, str]]): The list of tuples to remove duplicated
+
+    Returns:
+        List[Tuple[str, str, str, str, str]]: The list of tuples without duplicated
+    """
+    # Check if 2 elements has the same source, CUI and TUI in a row
+    for index, item in enumerate(tup):
+        if index > 0 and item[1] == tup[index - 1][1] and item[2] == tup[index - 1][2] \
+                and item[4] == tup[index - 1][4]:
+            tup.pop(index)
+    return tup
+
+
 class MetathesaurusQueries:
     """Metathesaurus API"""
 
@@ -49,43 +88,6 @@ class MetathesaurusQueries:
         query = f"SELECT * FROM MRCONSO WHERE LAT = '{language.value}' <> 0"
         return self.db.execute_query(query, all_rows)
 
-    def _sortTuple(self, tup: List[Tuple[str, str, str, str, str]]):
-        """Sorts a list of tuples alphabetically
-
-        Args:
-            tup (List[Tuple[str, str, str, str, str]]): The list of tuples to sort
-
-        Returns:
-            List[Tuple[str, str, str, str, str]]: The list of tuples sorted alphabetically
-        """
-        # Getting the length of list
-        # of tuples
-        n = len(tup)
-
-        for i in range(n):
-            for j in range(n-i-1):
-
-                if tup[j][1] > tup[j + 1][1]:
-                    tup[j], tup[j + 1] = tup[j + 1], tup[j]
-
-        return tup
-
-    def _removeDuplicated(self, tup: List[Tuple[str, str, str, str, str]]):
-        """Removes duplicated tuples
-
-        Args:
-            tup (List[Tuple[str, str, str, str, str]]): The list of tuples to remove duplicated
-
-        Returns:
-            List[Tuple[str, str, str, str, str]]: The list of tuples without duplicated
-        """
-        # Check if 2 elements has the same source, CUI and TUI in a row
-        for index, item in enumerate(tup):
-            if index > 0 and item[1] == tup[index - 1][1] and item[2] == tup[index - 1][2] \
-                    and item[4] == tup[index - 1][4]:
-                tup.pop(index)
-        return tup
-
     def get_all_mrcon_with_sty(self, nb_data=0, language=Languages.ENG, all_rows=True,
                                offset=None) -> List[Tuple[str, str, str, str, str]]:
         """Returns all concepts with STY
@@ -97,15 +99,15 @@ class MetathesaurusQueries:
         query = f"SELECT a.str, c.sab, a.cui, a.lui, b.sty, b.tui FROM MRCON a, MRSTY b, MRSO c \
             WHERE LAT = '{language.value}' AND a.cui=b.cui AND a.ts = 'P' AND a.stt = 'PF' \
                 AND a.lui=c.lui"
-        if nb_data != 0:
+        if nb_data != 0 and nb_data is not None:
             query += " LIMIT " + str(nb_data)
             if offset:
                 query += " OFFSET " + str(offset)
         res = self.db.execute_query(query, all_rows)
         if res is None:
             return None
-        alphabetic_sorted_tuples = self._sortTuple(res)
-        return self._removeDuplicated(alphabetic_sorted_tuples)
+        alphabetic_sorted_tuples = sort_tuple(res)
+        return remove_duplicated(alphabetic_sorted_tuples)
 
     def get_aui_from_cui_and_source_and_lui(self, cui: str, source: str,
                                             lui: str, language=Languages.ENG) -> str:
@@ -208,3 +210,14 @@ class MetathesaurusQueries:
             AND AUI='{aui}' LIMIT 1"
         res = self.db.execute_query(query, False)
         return len(res[0].split("."))
+
+    def get_all_unique_terms(self):
+        """Returns all unique terms in the database
+
+        Returns:
+            list: A list of all unique terms [(CUI, AUI, SAB, STR, TUI)]
+        """
+        query = "SELECT DISTINCT a.cui, a.aui, a.sab, a.str, b.tui from MRCONSO a, MRSTY b \
+            WHERE a.cui=b.cui AND a.ISPREF='Y' AND a.LAT='ENG' AND a.STT='PF' AND a.TS='P'"
+        res = self.db.execute_query(query, True)
+        return res
