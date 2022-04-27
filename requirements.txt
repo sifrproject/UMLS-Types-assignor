@@ -11,6 +11,9 @@ python-dotenv==0.20.0
 lxml==4.8.0
 urllib3==1.25.8
 
+# Preprocessing
+nltk==3.7
+
 # Plottings
 matplotlib==3.5.1
 matplotlib-inline==0.1.3
