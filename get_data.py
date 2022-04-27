@@ -75,8 +75,10 @@ def generate_source_data(limit: int, verbose=False):
             text_file.close()
             print("Index Database: ", db_index)
         else:
-            print("No db_index file found")
-            sys.exit(84)
+            text_file = open(db_index_path, "w+", encoding='utf8')
+            text_file.write('0')
+            text_file.close()
+            db_index = 0
 
     start = timeit.default_timer()
 
