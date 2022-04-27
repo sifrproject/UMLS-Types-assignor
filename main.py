@@ -2,14 +2,14 @@ import os
 import sys
 import argparse
 
+# Typing
+from typing import Any
+
 # Config File
 import yaml
 
 # Pipeline
 import mlflow
-
-# Typing
-from typing import Any
 
 from get_data import generate_source_data
 from process_data import preprocess
@@ -39,7 +39,8 @@ def main():
     config = load_config("config.yaml")
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--verbose', help='Active verbose mode.', action='store_true')
+    parser.add_argument(
+        '--verbose', help='Active verbose mode.', action='store_true')
     parser.add_argument('--only_source', help='Pipeline launchs only the generation of the \
         source data.')
     parser.add_argument('--only_preprocess', help='Pipeline launchs only the preprocess of the \
@@ -60,16 +61,15 @@ def main():
     only_preprocess = args.only_preprocess
     only_training = args.only_training
     limit = args.limit if args.limit else None
-    
+
     if limit is None and config["verbose"]:
         answer = input("You are running pipeline with the entire source data. \
             It'll be long to generate all data. Are you sure to continue ? [y/n]")
         if answer == 'n':
             print("Quitting")
             sys.exit(0)
-    
-    all = True if not (
-        only_source or only_preprocess or only_training) else False
+
+    all = not (only_source or only_preprocess or only_training)
 
     with mlflow.start_run(run_name="test_mlflow"):
 

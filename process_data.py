@@ -20,7 +20,7 @@ def save_preprocess_data(data):
     """
     if data is None:
         print("Error: data is None")
-        return None
+        return
     print("Saving preprocessed data...")
     start = time.time()
     data.to_csv('artefact/preprocessed_data.csv', index=False)

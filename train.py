@@ -22,11 +22,25 @@ import mlflow.keras
 
 
 def get_processed_data():
+    """Get preprocessed data stored in artefact/preprocessed_data.csv
+
+    Returns:
+        DataFrame: data
+    """
     return pd.read_csv('artefact/preprocessed_data.csv')
 
 
 def get_train_test_data(data, config):
-    # Split dataset 70/30
+    """Get train and test data
+
+    Args:
+        data (Dataframe): data
+        config (dict): config
+
+    Returns:
+        X_train_attributes, X_test_attributes, X_train_corpus, X_test_corpus, y_train, y_test
+
+    """
     df_train, df_test = train_test_split(data, test_size=config["test_size"])
 
     # Get values
@@ -47,10 +61,16 @@ def get_train_test_data(data, config):
 ######################################################################################
 # Word Embedding
 
-# Create list of lists of Unigrams (eg. ['I', 'am', 'a', 'student', '.'])
-
 
 def create_list_unigrams(corpus):
+    """Create list of lists of Unigrams (eg. ['I', 'am', 'a', 'student', '.'])
+
+    Args:
+        corpus (str): corpus
+
+    Returns:
+        List: list of lists of Unigrams
+    """
     lst_corpus = []
     for string in corpus:
         lst_words = string.split()
@@ -63,6 +83,16 @@ def create_list_unigrams(corpus):
 
 
 def train_w2v(train_corpus, config):
+    """Train word2vec model
+
+    Args:
+        train_corpus (str): Corpus that will be trained
+        config (dict): config
+
+    Returns:
+        X_train_word_embedding, bigrams_detector, trigrams_detector, \
+        tokenizer, nlp, dic_vocabulary
+    """
     lst_corpus = create_list_unigrams(train_corpus)
 
     # Detect Bigrams (eg. ['I am', 'a student', '.'])
@@ -123,7 +153,19 @@ def train_w2v(train_corpus, config):
         tokenizer, nlp, dic_vocabulary
 
 
-def apply_w2v(test_corpus, bigrams_detector, trigrams_detector, tokenizer, config):
+def apply_w2v(test_corpus: str, bigrams_detector, trigrams_detector, tokenizer, config):
+    """Apply word2vec model to test corpus
+
+    Args:
+        test_corpus (str): Corpus that will be tested
+        bigrams_detector (Phraser): Bigrams detector
+        trigrams_detector (Phraser): Trigrams detector
+        tokenizer (any): tokenizer
+        config (dict): config
+
+    Returns:
+        Any: X_test_word_embedding
+    """
     # Create list of lists of Unigrams (eg. ['I', 'am', 'a', 'student', '.'])
     lst_corpus = create_list_unigrams(test_corpus)
 
@@ -141,6 +183,16 @@ def apply_w2v(test_corpus, bigrams_detector, trigrams_detector, tokenizer, confi
 
 
 def word2vec(training_corpus, testing_corpus, config):
+    """Train and apply word2vec model
+
+    Args:
+        training_corpus (str): Corpus that will be trained
+        testing_corpus (str): Corpus that will be tested
+        config (dict): config
+
+    Returns:
+       X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary
+    """
     X_train_word_embedding, bigrams_detector, trigrams_detector, tokenizer, nlp, dic_vocabulary = \
         train_w2v(training_corpus, config)
     X_test_word_embedding = apply_w2v(
@@ -154,6 +206,16 @@ def word2vec(training_corpus, testing_corpus, config):
 # Modeling
 
 def get_embeddings(dic_vocabulary, nlp, config):
+    """Get embeddings
+
+    Args:
+        dic_vocabulary (dict): Dictionary of vocabulary
+        nlp (Word2Vec): Word2Vec model
+        config (dict): config
+
+    Returns:
+        NDArray[float64]: embeddings
+    """
     # Start the matrix (length of vocabulary x vector size) with all 0s
     embeddings = np.zeros((len(dic_vocabulary)+1, config["vector_size"]))
     for word, idx in dic_vocabulary.items():
@@ -173,6 +235,15 @@ def get_embeddings(dic_vocabulary, nlp, config):
 
 
 def get_input_layer_and_next_steps(type_model, config):
+    """Get input layer and next steps
+
+    Args:
+        type_model (str): Type of model
+        config (dict): config
+
+    Returns:
+        Inputs, Steps
+    """
     steps = config["neural_network"][type_model]["steps"].copy()
     # Search for the first step with the type "Input"
     first_step = next(step for step in steps if step["type"] == "Input")
@@ -184,6 +255,17 @@ def get_input_layer_and_next_steps(type_model, config):
 
 
 def create_model(type_model, config, embeddings=None, inputs=None):
+    """Create model
+
+    Args:
+        type_model (str): Type of model
+        config (dict): config
+        embeddings (any, optional): Embeddings. Defaults to None.
+        inputs (any, optional): Inputs. Defaults to None.
+
+    Returns:
+        Any: model
+    """
     inputs, steps = get_input_layer_and_next_steps(type_model, config)
 
     x = inputs
@@ -207,14 +289,42 @@ def create_model(type_model, config, embeddings=None, inputs=None):
 
 
 def create_word_embedding(config, embeddings):
+    """Create word embedding
+
+    Args:
+        config (dict): config
+        embeddings (any): embeddings
+
+    Returns:
+        any: model
+    """
     return create_model("word_embedding", config, embeddings)
 
 
 def create_multi_layer_perception(config):
+    """Create multi layer perception
+
+    Args:
+        config (dict): config
+
+    Returns:
+        any: model
+    """
     return create_model("multi_layer_perception", config)
 
 
 def concatenate_neural_network(word_embedding, mlp, max_class, config):
+    """Concatenate neural network
+
+    Args:
+        word_embedding (any): Word embedding model
+        mlp (any): Multi layer perception model
+        max_class (int): Max class
+        config (dict): config
+
+    Returns:
+        Any: model
+    """
     x = layers.concatenate([mlp.output, word_embedding.output])
 
     steps = config["neural_network"]["concatenate"]["steps"].copy()
@@ -233,6 +343,17 @@ def concatenate_neural_network(word_embedding, mlp, max_class, config):
 
 
 def get_model(nlp, dic_vocabulary, max_class, config):
+    """Get model
+
+    Args:
+        nlp (Word2Vec): Word2Vec model
+        dic_vocabulary (dict): Dictionary of vocabulary
+        max_class (int): Max class
+        config (dict): config
+
+    Returns:
+        Any: Final model
+    """
     embeddings = get_embeddings(dic_vocabulary, nlp, config)
 
     word_embedding = create_word_embedding(config, embeddings)
@@ -254,12 +375,14 @@ def get_model(nlp, dic_vocabulary, max_class, config):
 
 
 def get_binary_loss(hist):
+    """Get binary loss"""
     loss = hist.history['loss']
     loss_val = loss[len(loss) - 1]
     return loss_val
 
 
 def get_binary_acc(hist):
+    """Get binary acc"""
     acc = hist.history['binary_accuracy']
     acc_value = acc[len(acc) - 1]
 
@@ -267,6 +390,7 @@ def get_binary_acc(hist):
 
 
 def get_validation_loss(hist):
+    """Get validation loss"""
     val_loss = hist.history['val_loss']
     val_loss_value = val_loss[len(val_loss) - 1]
 
@@ -274,6 +398,7 @@ def get_validation_loss(hist):
 
 
 def get_validation_acc(hist):
+    """Get validation acc"""
     val_acc = hist.history['val_binary_accuracy']
     val_acc_value = val_acc[len(val_acc) - 1]
 
@@ -281,6 +406,11 @@ def get_validation_acc(hist):
 
 
 def plot_results(training):
+    """Plot results (loss and acc) and save it to artefact/training.png
+
+    Args:
+        training (any): Training history
+    """
     # Plot loss and accuracy
     metrics = [k for k in training.history.keys() if (
         "loss" not in k) and ("val" not in k)]
@@ -308,6 +438,20 @@ def plot_results(training):
 
 def train_model(X_train_attributes, X_train_word_embedding, y_train, max_class, nlp,
                 dic_vocabulary, config):
+    """Train model
+
+    Args:
+        X_train_attributes ([any]): Attributes
+        X_train_word_embedding ([any]): Word embedding
+        y_train ([any]): Labels
+        max_class (int): Max class
+        nlp (Word2Vec): Word2Vec model
+        dic_vocabulary (dict): Dictionary of vocabulary
+        config (dict): config
+
+    Returns:
+        tuple: model, training
+    """
     model = get_model(nlp, dic_vocabulary, max_class, config)
 
     # Encode y_train
@@ -335,6 +479,15 @@ def train_model(X_train_attributes, X_train_word_embedding, y_train, max_class, 
 
 
 def evaluate_multi_classif(model, history, y_test, predicted, config):
+    """Evaluate multi classification
+
+    Args:
+        model (Model): Model
+        history (any): History
+        y_test ([any]): Labels
+        predicted ([str]): Predicted labels
+        config (dict): config
+    """
     ## Accuracy, Precision, Recall
     accuracy = sk_metrics.accuracy_score(y_test, predicted)
     print("Accuracy:",  round(accuracy, 2))
@@ -383,6 +536,17 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
 
 
 def test_model(model, history, X_test_attributes, X_test_word_embedding, y_train, y_test, config):
+    """Test model
+
+    Args:
+        model (Model): Model
+        history (any): History
+        X_test_attributes ([[float]]): Attributes
+        X_test_word_embedding (any): Word embedding
+        y_train ([any]): Train Labels
+        y_test ([any]): Test Labels
+        config (dict): config
+    """
     predicted_prob = model.predict([X_test_word_embedding, X_test_attributes])
     dic_y_mapping = {n: label for n, label in
                      enumerate(np.unique(y_train))}
@@ -393,6 +557,11 @@ def test_model(model, history, X_test_attributes, X_test_word_embedding, y_train
 
 
 def train_and_test(config):
+    """Training and testing step
+
+    Args:
+        config (dict): config
+    """
 
     # Data preparation
     data = get_processed_data()
