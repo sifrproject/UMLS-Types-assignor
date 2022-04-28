@@ -5,8 +5,8 @@ drop_columns: []
 test_size: 0.3 # Percentage of data used for testing
 
 # Preprocessing
-stemming: False
-lemmitization: True
+stemming: false
+lemmitization: true
 
 # Word2Vec
 vector_size: 500 # vector_size
@@ -30,17 +30,17 @@ neural_network:
         imput_length: 50 # sequence_length
         output_shape: 500 # vector_size
         weights: "embeddings"
-        trainable: False
+        trainable: false
       - name: "LSTM-1"
         type: "LSTM"
         units: 50 # sequence_length
         dropout: 0.2
-        return_sequences: True
+        return_sequences: true
       - name: "LSTM-2"
         type: "LSTM"
         units: 50 # sequence_length
         dropout: 0.2
-        return_sequences: False
+        return_sequences: false
       - name: "Dense-1-WE"
         type: "Dense"
         units: 220
@@ -74,15 +74,15 @@ neural_network:
     learning_rate: 0.001 # Unused
     decay: 0.0 # Unused
     momentum: 0.0 # Unused
-    nesterov: False # Unused
+    nesterov: false # Unused
     clipnorm: 0.0 # Unused
     clipvalue: 0.0 # Unused
     beta_1: 0.9 # Unused
     beta_2: 0.999 # Unused
     epsilon: 1e-08 # Unused
-    amsgrad: False # Unused
+    amsgrad: false # Unused
   loss: "sparse_categorical_crossentropy"
   metrics: [] # Unused
   batch_size: 64
   epochs: 30
-  shuffle: True
+  shuffle: true
