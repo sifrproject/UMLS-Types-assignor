@@ -130,6 +130,8 @@ class MetathesaurusQueries:
             str: The source of the concept
         """
         query = {'ticket': auth.getst()}
+        if query["ticket"] is None:
+            return None
         url = self.service + "/rest/content/current/CUI/" + cui + "/definitions"
         resp = self.http.request("GET", url, fields=query)
         items = json.loads(resp.data)
@@ -174,6 +176,8 @@ class MetathesaurusQueries:
             int: The number of descendants of the concept
         """
         query = {'ticket': auth.getst(), 'pageSize': 100}
+        if query["ticket"] is None:
+            return -1
         url = self.service + "/rest/content/current/AUI/" + \
             aui + "/descendants"
         resp = self.http.request("GET", url, fields=query)
@@ -190,6 +194,8 @@ class MetathesaurusQueries:
             int: The number of descendants of the concept
         """
         query = {'ticket': auth.getst(), 'pageSize': 100}
+        if query["ticket"] is None:
+            return -1
         url = self.service + "/rest/content/current/AUI/" + \
             aui + "/ancestors"
         resp = self.http.request("GET", url, fields=query)

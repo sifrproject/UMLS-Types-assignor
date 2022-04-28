@@ -32,9 +32,14 @@ class Authentication:
         response_request = requests.post(
             URI + AUTH_ENDPOINT, data=params, headers=headers)
         response = fromstring(response_request.text)
-        tgt = response.xpath('//form/@action')[0]
-        tgt = tgt.replace("api-key", "tickets")
-        self.tgt = tgt
+        try:
+            tgt = response.xpath('//form/@action')[0]
+            tgt = tgt.replace("api-key", "tickets")
+            self.tgt = tgt
+        except IndexError:
+            print(response)
+            print("Error getting TGT")
+            self.tgt = "Error"
 
     def getst(self) -> str:
         """Get the service ticket for future authentication
@@ -44,6 +49,8 @@ class Authentication:
         """
         if self.tgt is None:
             self.gettgt()
+        if self.tgt == "Error":
+            return None
         params = {'service': self.service}
         headers = {"Content-type": "application/x-www-form-urlencoded",
                    "Accept": "text/plain", "User-Agent": "python"}
