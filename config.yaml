@@ -3,6 +3,7 @@ verbose: true
 y_classificaton_column: "GUI" # Column which contains the classification result
 drop_columns: []
 test_size: 0.3 # Percentage of data used for testing
+debug_output_path: ""
 
 # Preprocessing
 stemming: false

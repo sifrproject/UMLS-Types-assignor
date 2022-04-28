@@ -1,15 +1,41 @@
 # 2nd step: Process data from artefact/data.csv
 
+# Pipeline
+import mlflow
+
 # Data
 import re
 import time
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Preprocessing
 import nltk
 nltk.download('stopwords', quiet=True)
 nltk.download('wordnet', quiet=True)
 nltk.download('omw-1.4', quiet=True)
+
+
+def repartition_visualisation(data, config):
+    """Save the visualisation of the repartition of the data.
+
+    Args:
+        data (pd.DataFrame): dataframe with the preprocessed data
+        config (config): config
+    """
+    if data is None:
+        print("Error: data is None")
+        return
+    # Plotting the univariate distribution of the data
+    column = config["y_classificaton_column"]
+
+    fig, ax = plt.subplots()
+    fig.suptitle("Repartitions of " + column + "s", fontsize=12)
+    data[column].reset_index().groupby(column).count().sort_values(by= 
+        "index").plot(kind="barh", legend=False, 
+            ax=ax).grid(axis='x')
+    fig.savefig('artefact/repartitions.png')
+    plt.close(fig)
 
 
 def save_preprocess_data(data):
@@ -82,6 +108,10 @@ def preprocess(config):
     # Import data.csv
     data = pd.read_csv('artefact/data.csv')
 
+    # Log numbers of rows in MLflow
+    nb_rows = len(data.index)
+    mlflow.log_param("nb_rows", nb_rows)
+
     ######################################################################################
     # Preprocessing Numerical data
 
@@ -115,4 +145,5 @@ def preprocess(config):
     end = time.time()
     print(f"Preprocessing done in {end - start} seconds")
     save_preprocess_data(data)
+    repartition_visualisation(data, config)
     return data

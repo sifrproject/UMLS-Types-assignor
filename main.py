@@ -49,6 +49,8 @@ def main():
         preprocessed data.')
     parser.add_argument('--limit', type=int,
                         help='Limit of the source data number generated.')
+    parser.add_argument('--debug_output_path', type=str,
+                        help='Path of the output log.')
 
     args = parser.parse_args()
 
@@ -56,6 +58,9 @@ def main():
         config["verbose"] = True
     else:
         config["verbose"] = False
+        
+    if args.debug_output_path:
+        config["debug_output_path"] = args.debug_output_path
 
     only_source = args.only_source
     only_preprocess = args.only_preprocess
@@ -76,7 +81,8 @@ def main():
         # Print out current run_uuid
         run_uuid = mlflow.active_run().info.run_uuid
         print("MLflow Run ID: %s" % run_uuid)
-
+        mlflow.log_param("run_uuid", run_uuid)
+        
         if only_source or all:
             source_data = generate_source_data(limit, config["verbose"])
         if only_preprocess or all:
