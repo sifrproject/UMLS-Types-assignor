@@ -43,7 +43,7 @@ $ python main.py
 $ python main.py -h
 
 > usage: main.py [-h] [--verbose] [--only_source ONLY_SOURCE] [--only_preprocess ONLY_PREPROCESS]
-               [--only_training ONLY_TRAINING] [--limit LIMIT]
+               [--only_training ONLY_TRAINING] [--limit LIMIT] [--debug_output_path DEBUG_OUTPUT_PATH]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -55,6 +55,8 @@ optional arguments:
   --only_training ONLY_TRAINING
                         Pipeline launchs only the training of the preprocessed data.
   --limit LIMIT         Limit of the source data number generated.
+  --debug_output_path DEBUG_OUTPUT_PATH
+                        Path of the output log.
 ```
 
 3- Use MlFlow UI to visualize data in [**localhost:5000**](http://127.0.0.1:5000/)
