@@ -8,6 +8,7 @@ import re
 import time
 import pandas as pd
 import matplotlib.pyplot as plt
+from pandas_profiling import ProfileReport
 
 # Preprocessing
 import nltk
@@ -36,6 +37,12 @@ def repartition_visualisation(data, config):
             ax=ax).grid(axis='x')
     fig.savefig('artefact/repartitions.png')
     plt.close(fig)
+    # Take 10% of the data and profile report
+    rows = data.sample(frac=0.10)
+    profile = ProfileReport(rows, title="est report", progress_bar=False, \
+                            vars={"num": {"low_categorical_threshold": 0}})
+    profile.to_file("artefact/panda_report_output.html")
+    mlflow.log_artifact("artefact/panda_report_output.html")
 
 
 def save_preprocess_data(data):

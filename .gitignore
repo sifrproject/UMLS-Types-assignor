@@ -10,3 +10,5 @@ results.png
 training.png
 mlruns
 artefact/models
+artefact/panda_report_output.html
+artefact/repartitions.png
