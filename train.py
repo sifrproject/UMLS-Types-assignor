@@ -4,21 +4,20 @@ import shutil
 # Data
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 
 # Plotting
-from keras.utils.vis_utils import plot_model
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Word Embedding
 import gensim
-import gensim.downloader as gensim_api
 
 # Neural network
 from tensorflow.keras import models, layers, preprocessing as kprocessing
+from sklearn.model_selection import train_test_split
 from sklearn import metrics as sk_metrics
 from keras import metrics
+from keras.utils.vis_utils import plot_model  # Plot
 
 import mlflow
 import mlflow.keras
@@ -114,20 +113,20 @@ def train_w2v(train_corpus, config):
                                           epochs=config["w2v_epochs"])
 
     if config["verbose"]:
-        print("The model has been trained on {} words.\n".format(
-            nlp.corpus_total_words))
+        print(
+            f"The model has been trained on {nlp.corpus_total_words} words.\n")
         print("Shape of the word2vec model: ", nlp.wv.vectors.shape)
-        print("It means that there are {} words in the model.".format(
-            nlp.wv.vectors.shape[0]))
-        print("And each word has {} dimensions' vector.\n".format(
-            nlp.wv.vectors.shape[1]))
+        print(
+            f"It means that there are {nlp.wv.vectors.shape[0]} words in the model.")
+        print(
+            f"And each word has {nlp.wv.vectors.shape[1]} dimensions' vector.\n")
 
         word = "amine"
         try:
-            print("The most similar words to '{}' are:".format(
-                word), nlp.wv.most_similar(word))
+            print(
+                f"The most similar words to '{word}' are:", nlp.wv.most_similar(word))
         except KeyError:
-            print("The word '{}' is not in the vocabulary".format(word))
+            print(f"The word '{word}' is not in the vocabulary")
 
     # Tokenize text -> Indexation of each word (eg. {'NaN': 1, 'enzyme': 2, 'amine': 3...})
     tokenizer = kprocessing.text.Tokenizer(lower=True, split=' ', oov_token="NaN",
@@ -146,10 +145,10 @@ def train_w2v(train_corpus, config):
 
     if config["verbose"]:
         print("Shape of the word embedding: ", X_train_word_embedding.shape)
-        print("It means that there are {} words in the model.".format(
-            X_train_word_embedding.shape[0]))
-        print("And each word has {} dimensions' vector.\n".format(
-            X_train_word_embedding.shape[1]))
+        print(
+            f"It means that there are {X_train_word_embedding.shape[0]} words in the model.")
+        print(
+            f"And each word has {X_train_word_embedding.shape[1]} dimensions' vector.\n")
         length_largest = len(max(train_corpus, key=len).split(' '))
         print("Highest length of definitions: ", length_largest)
     return X_train_word_embedding, bigrams_detector, trigrams_detector, \
@@ -532,7 +531,7 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
     mlflow.log_artifact("artefact/results.png")
     # Add output log to mlflow log if debug_output_path is file
     if config["debug_output_path"] and len(config["debug_output_path"]) > 0 \
-    and os.path.isfile(config["debug_output_path"]):
+            and os.path.isfile(config["debug_output_path"]):
         mlflow.log_artifact(config["debug_output_path"])
 
     # log model

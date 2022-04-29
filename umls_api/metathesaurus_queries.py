@@ -1,6 +1,6 @@
+from typing import Any, List, Tuple
 import json
 import urllib3
-from typing import Any, List, Tuple
 from umls_api.authentication_umls_api import Authentication
 from umls_api.mysql_connection import DatabaseConnection
 from umls_api.languages import Languages

@@ -91,7 +91,7 @@ class DatabaseConnection:
                     else:
                         row = cursor.fetchone()
                         res = row
-        except:
+        except: # pylint: disable=bare-except
             res = False
             print("Error: unable to execute query", query)
         return res
@@ -113,7 +113,7 @@ class DatabaseConnection:
                 cursor.execute(query)
                 rows = cursor.fetchmany(limit)
                 res = rows
-        except:
+        except: # pylint: disable=bare-except
             res = False
             print("Error: unable to execute query", query)
         return res

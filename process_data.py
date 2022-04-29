@@ -1,11 +1,12 @@
 # 2nd step: Process data from artefact/data.csv
 
+import re
+import time
+
 # Pipeline
 import mlflow
 
 # Data
-import re
-import time
 import pandas as pd
 import matplotlib.pyplot as plt
 from pandas_profiling import ProfileReport
@@ -32,14 +33,13 @@ def repartition_visualisation(data, config):
 
     fig, ax = plt.subplots()
     fig.suptitle("Repartitions of " + column + "s", fontsize=12)
-    data[column].reset_index().groupby(column).count().sort_values(by= 
-        "index").plot(kind="barh", legend=False, 
-            ax=ax).grid(axis='x')
+    data[column].reset_index().groupby(column).count().sort_values(by="index")\
+    .plot(kind="barh", legend=False, ax=ax).grid(axis='x')
     fig.savefig('artefact/repartitions.png')
     plt.close(fig)
     # Take 10% of the data and profile report
     rows = data.sample(frac=0.10)
-    profile = ProfileReport(rows, title="est report", progress_bar=False, \
+    profile = ProfileReport(rows, title="est report", progress_bar=False,
                             vars={"num": {"low_categorical_threshold": 0}})
     profile.to_file("artefact/panda_report_output.html")
     mlflow.log_artifact("artefact/panda_report_output.html")

@@ -58,7 +58,7 @@ def main():
         config["verbose"] = True
     else:
         config["verbose"] = False
-        
+
     if args.debug_output_path:
         config["debug_output_path"] = args.debug_output_path
 
@@ -80,13 +80,13 @@ def main():
 
         # Print out current run_uuid
         run_uuid = mlflow.active_run().info.run_uuid
-        print("MLflow Run ID: %s" % run_uuid)
+        print(f"MLflow Run ID: {str(run_uuid)}")
         mlflow.log_param("run_uuid", run_uuid)
-        
+
         if only_source or all:
-            source_data = generate_source_data(limit, config["verbose"])
+            generate_source_data(limit, config["verbose"])
         if only_preprocess or all:
-            data = preprocess(config)
+            preprocess(config)
         if only_training or all:
             train_and_test(config)
 
