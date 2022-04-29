@@ -1,4 +1,5 @@
 import os
+import shutil
 
 # Data
 import pandas as pd
@@ -371,7 +372,7 @@ def get_model(nlp, dic_vocabulary, max_class, config):
         loss=loss, optimizer=optimize["name"], metrics=[metrics.binary_accuracy])
 
     # You need to install graphviz (see instructions at https://graphviz.gitlab.io/download/)
-    plot_model(model_mixed_data, to_file='model_plot.png',
+    plot_model(model_mixed_data, to_file='artefact/model_plot.png',
                show_shapes=True, show_layer_names=True)
     return model_mixed_data
 
@@ -536,6 +537,11 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
 
     # log model
     mlflow.keras.log_model(model, "model")
+    try:
+        shutil.rmtree("artefact/models")
+        print("Directory artefact/models removed")
+    except OSError as e:
+        print("Error: %s : %s" % ("artefact/models", e.strerror))
     mlflow.keras.save_model(model, "artefact/models")
 
     mlflow.end_run()

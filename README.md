@@ -28,7 +28,7 @@ UMLS_API_KEY=<your_api_key>
 1- Install the required packages
 
 ```bash
-$ pip install -r requirements.txt
+$ pip install -r requirements.txt && sudo apt install graphviz
 ```
 
 2- Launch pipeline
