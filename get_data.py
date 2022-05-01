@@ -38,9 +38,12 @@ def save_index_db(count: int, db_index_path="artefact/db_index"):
         count (int): Count of the database
         db_index_path (str, optional): Path of the file. Defaults to "db_index".
     """
-    text_file = open(db_index_path, "w+", encoding='utf8')
-    text_file.write(str(count))
-    text_file.close()
+    try:
+        text_file = open(db_index_path, "w+", encoding='utf8')
+        text_file.write(str(count))
+        text_file.close()
+    except Exception as e:
+        print(str(e))
 
 
 def save_to_csv(X_data: list, Y_data: list, db_index: int):
@@ -57,7 +60,7 @@ def save_to_csv(X_data: list, Y_data: list, db_index: int):
     data = pd.concat(
         [data, pd.DataFrame(Y_data, columns=['TUI', 'GUI'])], axis=1)
     # Save X and Y in the same csv file
-    if db_index > 0:
+    if db_index is not None and db_index > 0:
         data.to_csv('artefact/data.csv', mode="a", index=False, header=False)
     else:
         data.to_csv('artefact/data.csv', index=False)
@@ -166,11 +169,13 @@ def generate_source_data(limit: int, verbose=False):
     except KeyboardInterrupt:
         print("Quitting...")
         save_to_csv(X_data, Y_data, db_index)
-        save_index_db(db_index + count)
+        if limit:
+            save_index_db(db_index + count)
         sys.exit(0)
 
     save_to_csv(X_data, Y_data, db_index)
-    save_index_db(db_index + count)
+    if limit:
+        save_index_db(db_index + count)
 
     stop = timeit.default_timer()
 
