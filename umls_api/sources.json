@@ -1,0 +1,1556 @@
+[
+  {
+    "vocabulary": "WHOART Spanish",
+    "abbreviation": "WHOSPA",
+    "last_updated": "1999AA",
+    "language": "SPA",
+    "restriction_level": 2
+  },
+  {
+    "vocabulary": "WHOART Portuguese",
+    "abbreviation": "WHOPOR",
+    "last_updated": "1999AA",
+    "language": "POR",
+    "restriction_level": 2
+  },
+  {
+    "vocabulary": "WHOART German",
+    "abbreviation": "WHOGER",
+    "last_updated": "1999AA",
+    "language": "GER",
+    "restriction_level": 2
+  },
+  {
+    "vocabulary": "WHOART French",
+    "abbreviation": "WHOFRE",
+    "last_updated": "1999AA",
+    "language": "FRE",
+    "restriction_level": 2
+  },
+  {
+    "vocabulary": "WHOART",
+    "abbreviation": "WHO",
+    "last_updated": "1999AA",
+    "language": "ENG",
+    "restriction_level": 2
+  },
+  {
+    "vocabulary": "National Drug File",
+    "abbreviation": "VANDF",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Digital Anatomist",
+    "abbreviation": "UWDA",
+    "last_updated": "2003AC",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "USP Model Guidelines",
+    "abbreviation": "USPMG",
+    "last_updated": "2020AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "USP Compendial Nomenclature",
+    "abbreviation": "USP",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "UMDNS",
+    "abbreviation": "UMD",
+    "last_updated": "2021AA",
+    "language": "ENG",
+    "restriction_level": 1
+  },
+  {
+    "vocabulary": "UltraSTAR",
+    "abbreviation": "ULT",
+    "last_updated": "1995AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Traditional Korean Medical Terms",
+    "abbreviation": "TKMT",
+    "last_updated": "2011AB",
+    "language": "KOR",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Source Terminology Names (UMLS)",
+    "abbreviation": "SRC",
+    "last_updated": "1995AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Standard Product Nomenclature",
+    "abbreviation": "SPN",
+    "last_updated": "2004AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Source of Payment Typology",
+    "abbreviation": "SOP",
+    "last_updated": "2021AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "SNOMED CT",
+    "abbreviation": "Veterinary Extension",
+    "last_updated": "SNOMEDCT_VET",
+    "language": "2021AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "SNOMED CT",
+    "abbreviation": "US Edition",
+    "last_updated": "SNOMEDCT_US",
+    "language": "2021AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "SNOMED Intl 1998",
+    "abbreviation": "SNMI",
+    "last_updated": "1999AA",
+    "language": "ENG",
+    "restriction_level": 9
+  },
+  {
+    "vocabulary": "SNOMED 1982",
+    "abbreviation": "SNM",
+    "last_updated": "1991AA",
+    "language": "ENG",
+    "restriction_level": 9
+  },
+  {
+    "vocabulary": "SNOMED CT Spanish Edition",
+    "abbreviation": "SCTSPA",
+    "last_updated": "2021AB",
+    "language": "SPA",
+    "restriction_level": 9
+  },
+  {
+    "vocabulary": "RXNORM",
+    "abbreviation": "RXNORM",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Read Codes Synth",
+    "abbreviation": "RCDSY",
+    "last_updated": "2000AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Read Codes Am Synth",
+    "abbreviation": "RCDSA",
+    "last_updated": "2000AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Read Codes Am Engl",
+    "abbreviation": "RCDAE",
+    "last_updated": "2000AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Read Codes",
+    "abbreviation": "RCD",
+    "last_updated": "2000AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Clinical Concepts by R A Miller",
+    "abbreviation": "RAM",
+    "last_updated": "2000AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Quick Medical Reference",
+    "abbreviation": "QMR",
+    "last_updated": "1998AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Psychological Index Terms",
+    "abbreviation": "PSY",
+    "last_updated": "2005AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Pharmacy Practice Activity Classification",
+    "abbreviation": "PPAC",
+    "last_updated": "1999AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Perioperative Nursing Data Set",
+    "abbreviation": "PNDS",
+    "last_updated": "2018AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Physician Data Query",
+    "abbreviation": "PDQ",
+    "last_updated": "2019AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Patient Care Data Set",
+    "abbreviation": "PCDS",
+    "last_updated": "1999AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Omaha System",
+    "abbreviation": "OMS",
+    "last_updated": "2007AC",
+    "language": "ENG",
+    "restriction_level": 1
+  },
+  {
+    "vocabulary": "Online Mendelian Inheritance in Man",
+    "abbreviation": "OMIM",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "National Uniform Claim Committee - Health Care Provider Taxonomy",
+    "abbreviation": "NUCCHCPT",
+    "last_updated": "2021AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Nursing Outcomes Classification",
+    "abbreviation": "NOC",
+    "last_updated": "2018AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Nursing Interventions Classification",
+    "abbreviation": "NIC",
+    "last_updated": "2018AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Neuronames Brain Hierarchy",
+    "abbreviation": "NEU",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "FDB MedKnowledge",
+    "abbreviation": "NDDF",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "NCI SEER ICD Mappings",
+    "abbreviation": "NCISEER",
+    "last_updated": "2002AD",
+    "language": "",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Zebrafish Model Organism Database Terms",
+    "abbreviation": "NCI_ZFin",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Unified Code for Units of Measure",
+    "abbreviation": "NCI_UCUM",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Registry Nomenclature Information System",
+    "abbreviation": "NCI_RENI",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "National Cancer Institute Nature Pathway Interaction Database Terms",
+    "abbreviation": "NCI_PID",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Prostate Imaging Reporting and Data System Terms",
+    "abbreviation": "NCI_PI-RADS",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Pediatric Cancer Data Commons",
+    "abbreviation": "NCI_PCDC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NICHD Terminology",
+    "abbreviation": "NCI_NICHD",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NCPDP Terminology",
+    "abbreviation": "NCI_NCPDP",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NCI Health Level 7",
+    "abbreviation": "NCI_NCI-HL7",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NCI HUGO Gene Nomenclature",
+    "abbreviation": "NCI_NCI-HGNC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NCI Dictionary of Cancer Terms",
+    "abbreviation": "NCI_NCI-GLOSS",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "KEGG Pathway Database Terms",
+    "abbreviation": "NCI_KEGG",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Jackson Laboratories Mouse Terminology",
+    "abbreviation": "adapted for NCI use",
+    "last_updated": "NCI_JAX",
+    "language": "2021AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "International Neonatal Consortium",
+    "abbreviation": "NCI_INC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "International Conference on Harmonization Terms",
+    "abbreviation": "NCI_ICH",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NCI Integrated Canine Data Commons Terms",
+    "abbreviation": "NCI_ICDC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Geopolitical Entities",
+    "abbreviation": "Names",
+    "last_updated": "and Codes (GENC) Standard Edition 1",
+    "language": "NCI_GENC",
+    "restriction_level": "2021AB"
+  },
+  {
+    "vocabulary": "NCI Genomic Data Commons Terms",
+    "abbreviation": "NCI_GDC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Global Alignment of Immunization Safety Assessment in Pregnancy Terms",
+    "abbreviation": "NCI_GAIA",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "FDA Terminology",
+    "abbreviation": "NCI_FDA",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "European Directorate for the Quality of Medicines & Healthcare Terms",
+    "abbreviation": "NCI_EDQM-HC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NCI Developmental Therapeutics Program",
+    "abbreviation": "NCI_DTP",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Digital Imaging Communications in Medicine Terms",
+    "abbreviation": "NCI_DICOM",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NCI Division of Cancer Prevention Program Terms",
+    "abbreviation": "NCI_DCP",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Clinical Trials Reporting Program Terms",
+    "abbreviation": "NCI_CTRP",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Cancer Therapy Evaluation Program - Simple Disease Classification",
+    "abbreviation": "NCI_CTEP-SDC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Clinical Trial Data Commons",
+    "abbreviation": "NCI_CTDC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Common Terminology Criteria for Adverse Events 5.0",
+    "abbreviation": "NCI_CTCAE_5",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Common Terminology Criteria for Adverse Events 3.0",
+    "abbreviation": "NCI_CTCAE_3",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Common Terminology Criteria for Adverse Events 4.3 Subset",
+    "abbreviation": "NCI_CTCAE",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Cancer Research Center of Hawaii Nutrition Terminology",
+    "abbreviation": "NCI_CRCH",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Cellosaurus",
+    "abbreviation": "NCI_CELLOSAURUS",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "CDISC Glossary Terminology",
+    "abbreviation": "NCI_CDISC-GLOSS",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "CDISC Terminology",
+    "abbreviation": "NCI_CDISC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "U.S. Centers for Disease Control and Prevention Terms",
+    "abbreviation": "NCI_CDC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Childhood Cancer Predisposition Study Terminology",
+    "abbreviation": "NCI_CCPS",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Chemical Biology and Drug Development Vocabulary",
+    "abbreviation": "NCI_CBDD",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Content Archive Resource Exchange Lexicon",
+    "abbreviation": "NCI_CareLex",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Cancer Data Standards Registry and Repository",
+    "abbreviation": "NCI_caDSR",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Biomedical Research Integrated Domain Group Model",
+    "abbreviation": 5.3,
+    "last_updated": "NCI_BRIDG_5_3",
+    "language": "2021AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "Biomedical Research Integrated Domain Group Model",
+    "abbreviation": "3.0.3",
+    "last_updated": "NCI_BRIDG_3_0_3",
+    "language": "2021AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "Biomedical Research Integrated Domain Group Model Subset",
+    "abbreviation": "NCI_BRIDG",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "BioCarta online maps of molecular pathways",
+    "abbreviation": "adapted for NCI use",
+    "last_updated": "NCI_BioC",
+    "language": "2021AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "American College of Cardiology/American Heart Association Clinical Data Terminology",
+    "abbreviation": "NCI_ACC-AHA",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NCI Thesaurus",
+    "abbreviation": "NCI",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NCBI Taxonomy",
+    "abbreviation": "NCBI",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "NANDA-I Taxonomy",
+    "abbreviation": "NANDA-I",
+    "last_updated": "2018AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Manufacturers of Vaccines",
+    "abbreviation": "MVX",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "FDA Structured Product Labels",
+    "abbreviation": "MTHSPL",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Minimal Standard Terminology Italian (UMLS)",
+    "abbreviation": "MTHMSTITA",
+    "last_updated": "2002AA",
+    "language": "ITA",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Minimal Standard Terminology French (UMLS)",
+    "abbreviation": "MTHMSTFRE",
+    "last_updated": "2002AA",
+    "language": "FRE",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Minimal Standard Terminology (UMLS)",
+    "abbreviation": "MTHMST",
+    "last_updated": "2002AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC2E-ICD10 Thesaurus",
+    "abbreviation": "American English Equivalents",
+    "last_updated": "MTHICPC2ICD10AE",
+    "language": "2005AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "ICPC2E American English Equivalents",
+    "abbreviation": "MTHICPC2EAE",
+    "last_updated": "2004AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "ICD-9-CM Entry Terms",
+    "abbreviation": "MTHICD9",
+    "last_updated": "2015AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Metathesaurus CMS Formulary Reference File",
+    "abbreviation": "MTHCMSFRF",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Metathesaurus Names",
+    "abbreviation": "MTH",
+    "last_updated": "1990AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "MeSH Swedish",
+    "abbreviation": "MSHSWE",
+    "last_updated": "2021AB",
+    "language": "SWE",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Spanish",
+    "abbreviation": "MSHSPA",
+    "last_updated": "2021AB",
+    "language": "SPA",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Croatian",
+    "abbreviation": "MSHSCR",
+    "last_updated": "2019AA",
+    "language": "SCR",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Russian",
+    "abbreviation": "MSHRUS",
+    "last_updated": "2021AA",
+    "language": "RUS",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Portuguese",
+    "abbreviation": "MSHPOR",
+    "last_updated": "2021AB",
+    "language": "POR",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Polish",
+    "abbreviation": "MSHPOL",
+    "last_updated": "2021AA",
+    "language": "POL",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Norwegian",
+    "abbreviation": "MSHNOR",
+    "last_updated": "2019AA",
+    "language": "NOR",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Latvian",
+    "abbreviation": "MSHLAV",
+    "last_updated": "2012AA",
+    "language": "LAV",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Japanese",
+    "abbreviation": "MSHJPN",
+    "last_updated": "2015AB",
+    "language": "JPN",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Italian",
+    "abbreviation": "MSHITA",
+    "last_updated": "2019AA",
+    "language": "ITA",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH German",
+    "abbreviation": "MSHGER",
+    "last_updated": "2021AB",
+    "language": "GER",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "MeSH French",
+    "abbreviation": "MSHFRE",
+    "last_updated": "2021AA",
+    "language": "FRE",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Finnish",
+    "abbreviation": "MSHFIN",
+    "last_updated": "2008AA",
+    "language": "FIN",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Dutch",
+    "abbreviation": "MSHDUT",
+    "last_updated": "2005AB",
+    "language": "DUT",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH Czech",
+    "abbreviation": "MSHCZE",
+    "last_updated": "2021AA",
+    "language": "CZE",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MeSH",
+    "abbreviation": "MSH",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Micromedex",
+    "abbreviation": "MMX",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Multum",
+    "abbreviation": "MMSL",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 1
+  },
+  {
+    "vocabulary": "MedlinePlus Spanish Health Topics",
+    "abbreviation": "MEDLINEPLUS_SPA",
+    "last_updated": "2021AA",
+    "language": "SPA",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "MedlinePlus Health Topics",
+    "abbreviation": "MEDLINEPLUS",
+    "last_updated": "2021AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "MEDCIN",
+    "abbreviation": "MEDCIN",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Medication Reference Terminology",
+    "abbreviation": "MED-RT",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "MedDRA Spanish",
+    "abbreviation": "MDRSPA",
+    "last_updated": "2021AB",
+    "language": "SPA",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA Russian",
+    "abbreviation": "MDRRUS",
+    "last_updated": "2021AB",
+    "language": "RUS",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA Portuguese",
+    "abbreviation": "MDRPOR",
+    "last_updated": "2021AB",
+    "language": "POR",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA Korean",
+    "abbreviation": "MDRKOR",
+    "last_updated": "2021AB",
+    "language": "KOR",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA Japanese",
+    "abbreviation": "MDRJPN",
+    "last_updated": "2021AB",
+    "language": "JPN",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA Italian",
+    "abbreviation": "MDRITA",
+    "last_updated": "2021AB",
+    "language": "ITA",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA Hungarian",
+    "abbreviation": "MDRHUN",
+    "last_updated": "2021AB",
+    "language": "HUN",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA German",
+    "abbreviation": "MDRGER",
+    "last_updated": "2021AB",
+    "language": "GER",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA French",
+    "abbreviation": "MDRFRE",
+    "last_updated": "2021AB",
+    "language": "FRE",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA Dutch",
+    "abbreviation": "MDRDUT",
+    "last_updated": "2021AB",
+    "language": "DUT",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA Czech",
+    "abbreviation": "MDRCZE",
+    "last_updated": "2021AB",
+    "language": "CZE",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA Brazilian Portuguese",
+    "abbreviation": "MDRBPO",
+    "last_updated": "2021AB",
+    "language": "POR",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "MedDRA",
+    "abbreviation": "MDR",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Glossary of Clinical Epidemiologic Terms",
+    "abbreviation": "MCM",
+    "last_updated": "1992AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Chinese",
+    "abbreviation": "China",
+    "last_updated": "LNC-ZH-CN",
+    "language": "2021AB",
+    "restriction_level": "CHI"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Turkish",
+    "abbreviation": "Turkey",
+    "last_updated": "LNC-TR-TR",
+    "language": "2021AB",
+    "restriction_level": "TUR"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Russian",
+    "abbreviation": "Russia",
+    "last_updated": "LNC-RU-RU",
+    "language": "2021AB",
+    "restriction_level": "RUS"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Portuguese",
+    "abbreviation": "Brazil",
+    "last_updated": "LNC-PT-BR",
+    "language": "2021AB",
+    "restriction_level": "POR"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Dutch",
+    "abbreviation": "Netherlands",
+    "last_updated": "LNC-NL-NL",
+    "language": "2021AB",
+    "restriction_level": "DUT"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Korea",
+    "abbreviation": "Korean",
+    "last_updated": "LNC-KO-KR",
+    "language": "2021AB",
+    "restriction_level": "KOR"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Italian",
+    "abbreviation": "Italy",
+    "last_updated": "LNC-IT-IT",
+    "language": "2021AB",
+    "restriction_level": "ITA"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - French",
+    "abbreviation": "France",
+    "last_updated": "LNC-FR-FR",
+    "language": "2021AB",
+    "restriction_level": "FRE"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - French",
+    "abbreviation": "Canada",
+    "last_updated": "LNC-FR-CA",
+    "language": "2021AB",
+    "restriction_level": "FRE"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - French",
+    "abbreviation": "Belgium",
+    "last_updated": "LNC-FR-BE",
+    "language": "2021AB",
+    "restriction_level": "FRE"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Estonian",
+    "abbreviation": "Estonia",
+    "last_updated": "LNC-ET-EE",
+    "language": "2021AB",
+    "restriction_level": "EST"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Spanish",
+    "abbreviation": "Spain",
+    "last_updated": "LNC-ES-ES",
+    "language": "2021AB",
+    "restriction_level": "SPA"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Spanish",
+    "abbreviation": "Argentina",
+    "last_updated": "LNC-ES-AR",
+    "language": "2021AB",
+    "restriction_level": "SPA"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - Greek",
+    "abbreviation": "Greece",
+    "last_updated": "LNC-EL-GR",
+    "language": "2021AB",
+    "restriction_level": "GRE"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - German",
+    "abbreviation": "Germany",
+    "last_updated": "LNC-DE-DE",
+    "language": "2021AB",
+    "restriction_level": "GER"
+  },
+  {
+    "vocabulary": "LOINC Linguistic Variant - German",
+    "abbreviation": "Austria",
+    "last_updated": "LNC-DE-AT",
+    "language": "2021AB",
+    "restriction_level": "GER"
+  },
+  {
+    "vocabulary": "LOINC",
+    "abbreviation": "LNC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Library of Congress Subject Headings",
+    "abbreviation": "Northwestern University subset",
+    "last_updated": "LCH_NW",
+    "language": "2014AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "Library of Congress Subject Headings",
+    "abbreviation": "LCH",
+    "last_updated": "1992AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Korean Standard Classification of Disease Version 5",
+    "abbreviation": "KCD5",
+    "last_updated": "2009AA",
+    "language": "KOR",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Congenital Mental Retardation Syndromes",
+    "abbreviation": "JABL",
+    "last_updated": "2000AA",
+    "language": "ENG",
+    "restriction_level": 1
+  },
+  {
+    "vocabulary": "ICPC Swedish",
+    "abbreviation": "ICPCSWE",
+    "last_updated": "2000AA",
+    "language": "SWE",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC Spanish",
+    "abbreviation": "ICPCSPA",
+    "last_updated": "2000AA",
+    "language": "SPA",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC Portuguese",
+    "abbreviation": "ICPCPOR",
+    "last_updated": "1999AA",
+    "language": "POR",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC Norwegian",
+    "abbreviation": "ICPCNOR",
+    "last_updated": "1999AA",
+    "language": "NOR",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC Italian",
+    "abbreviation": "ICPCITA",
+    "last_updated": "1999AA",
+    "language": "ITA",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC Hungarian",
+    "abbreviation": "ICPCHUN",
+    "last_updated": "1999AA",
+    "language": "HUN",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC Hebrew",
+    "abbreviation": "ICPCHEB",
+    "last_updated": "2000AA",
+    "language": "HEB",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC German",
+    "abbreviation": "ICPCGER",
+    "last_updated": "2000AA",
+    "language": "GER",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC French",
+    "abbreviation": "ICPCFRE",
+    "last_updated": "2000AA",
+    "language": "FRE",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC Finnish",
+    "abbreviation": "ICPCFIN",
+    "last_updated": "1999AA",
+    "language": "FIN",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC Dutch",
+    "abbreviation": "ICPCDUT",
+    "last_updated": "1999AA",
+    "language": "DUT",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC Danish",
+    "abbreviation": "ICPCDAN",
+    "last_updated": "1999AA",
+    "language": "DAN",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC Basque",
+    "abbreviation": "ICPCBAQ",
+    "last_updated": "2000AA",
+    "language": "BAQ",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC-2 PLUS",
+    "abbreviation": "ICPC2P",
+    "last_updated": "2006AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "ICPC2-ICD10 Thesaurus",
+    "abbreviation": "ICPC2ICD10ENG",
+    "last_updated": "2005AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "ICPC2-ICD10 Thesaurus",
+    "abbreviation": "Dutch Translation",
+    "last_updated": "ICPC2ICD10DUT",
+    "language": "2005AB",
+    "restriction_level": "DUT"
+  },
+  {
+    "vocabulary": "International Classification of Primary Care",
+    "abbreviation": "2nd Edition",
+    "last_updated": "Electronic",
+    "language": "ICPC2EENG",
+    "restriction_level": "2004AB"
+  },
+  {
+    "vocabulary": "ICPC2E Dutch",
+    "abbreviation": "ICPC2EDUT",
+    "last_updated": "2004AB",
+    "language": "DUT",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "International Classification of Primary Care",
+    "abbreviation": "ICPC",
+    "last_updated": "1998AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "International Classification for Nursing Practice",
+    "abbreviation": "ICNP",
+    "last_updated": "2019AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "International Classification of Functioning",
+    "abbreviation": "Disability and Health for Children and Youth",
+    "last_updated": "ICF-CY",
+    "language": "2009AA",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "International Classification of Functioning",
+    "abbreviation": "Disability and Health",
+    "last_updated": "ICF",
+    "language": "2009AA",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "International Classification of Diseases",
+    "abbreviation": "Ninth Revision",
+    "last_updated": "Clinical Modification",
+    "language": "ICD9CM",
+    "restriction_level": "2015AA"
+  },
+  {
+    "vocabulary": "ICD-10 Procedure Coding System",
+    "abbreviation": "ICD10PCS",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICD10",
+    "abbreviation": "Dutch Translation",
+    "last_updated": "ICD10DUT",
+    "language": "2004AB",
+    "restriction_level": "DUT"
+  },
+  {
+    "vocabulary": "International Classification of Diseases",
+    "abbreviation": "Tenth Revision",
+    "last_updated": "Clinical Modification",
+    "language": "ICD10CM",
+    "restriction_level": "2021AB"
+  },
+  {
+    "vocabulary": "ICD-10",
+    "abbreviation": "Australian Modification",
+    "last_updated": "Americanized English Equivalents",
+    "language": "ICD10AMAE",
+    "restriction_level": "2002AD"
+  },
+  {
+    "vocabulary": "ICD-10",
+    "abbreviation": "Australian Modification",
+    "last_updated": "ICD10AM",
+    "language": "2000AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "ICD-10",
+    "abbreviation": "American English Equivalents",
+    "last_updated": "ICD10AE",
+    "language": "1998AA",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "International Classification of Diseases and Related Health Problems",
+    "abbreviation": "Tenth Revision",
+    "last_updated": "ICD10",
+    "language": "2004AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "Human Phenotype Ontology",
+    "abbreviation": "HPO",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "ICPC2E ICD10 Relationships",
+    "abbreviation": "HLREL",
+    "last_updated": "2001AA",
+    "language": "",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "HL7 Version 3.0",
+    "abbreviation": "HL7V3.0",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "HL7 Version 2.5",
+    "abbreviation": "HL7V2.5",
+    "last_updated": "2005AC",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "HUGO Gene Nomenclature Committee",
+    "abbreviation": "HGNC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "CPT in HCPCS",
+    "abbreviation": "HCPT",
+    "last_updated": "2021AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "HCPCS - Healthcare Common Procedure Coding System",
+    "abbreviation": "HCPCS",
+    "last_updated": "2021AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "CDT in HCPCS",
+    "abbreviation": "HCDT",
+    "last_updated": "2021AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Gold Standard Drug Database",
+    "abbreviation": "GS",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Gene Ontology",
+    "abbreviation": "GO",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Foundational Model of Anatomy",
+    "abbreviation": "FMA",
+    "last_updated": "2019AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "DXplain",
+    "abbreviation": "DXP",
+    "last_updated": "1995AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Diagnostic and Statistical Manual of Mental Disorders",
+    "abbreviation": "Fifth Edition",
+    "last_updated": "DSM-5",
+    "language": "2016AB",
+    "restriction_level": "ENG"
+  },
+  {
+    "vocabulary": "DrugBank",
+    "abbreviation": "DRUGBANK",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "UMDNS German",
+    "abbreviation": "DMDUMD",
+    "last_updated": "1999AA",
+    "language": "GER",
+    "restriction_level": 1
+  },
+  {
+    "vocabulary": "ICD-10 German",
+    "abbreviation": "DMDICD10",
+    "last_updated": "1997AA",
+    "language": "GER",
+    "restriction_level": 1
+  },
+  {
+    "vocabulary": "Diseases Database",
+    "abbreviation": "DDB",
+    "last_updated": "2001AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Vaccines Administered",
+    "abbreviation": "CVX",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "COSTART",
+    "abbreviation": "CST",
+    "last_updated": "1999AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "CRISP Thesaurus",
+    "abbreviation": "CSP",
+    "last_updated": "2006AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "CPT Spanish",
+    "abbreviation": "CPTSP",
+    "last_updated": "2001AC",
+    "language": "SPA",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "CPT - Current Procedural Terminology",
+    "abbreviation": "CPT",
+    "last_updated": "2021AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Medical Entities Dictionary",
+    "abbreviation": "CPM",
+    "last_updated": "2003AC",
+    "language": "ENG",
+    "restriction_level": 2
+  },
+  {
+    "vocabulary": "COSTAR",
+    "abbreviation": "COSTAR",
+    "last_updated": "2002AD",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Consumer Health Vocabulary",
+    "abbreviation": "CHV",
+    "last_updated": "2012AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "CDT",
+    "abbreviation": "CDT",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Race & Ethnicity - CDC",
+    "abbreviation": "CDCREC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Clinical Classifications Software Refined for ICD-10-PCS",
+    "abbreviation": "CCSR_ICD10PCS",
+    "last_updated": "2021AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Clinical Classifications Software Refined for ICD-10-CM",
+    "abbreviation": "CCSR_ICD10CM",
+    "last_updated": "2021AA",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Clinical Classifications Software",
+    "abbreviation": "CCS",
+    "last_updated": "2005AC",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Clinical Problem Statements",
+    "abbreviation": "CCPSS",
+    "last_updated": "2000AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "Clinical Care Classification",
+    "abbreviation": "CCC",
+    "last_updated": "2018AA",
+    "language": "ENG",
+    "restriction_level": 1
+  },
+  {
+    "vocabulary": "Beth Israel Problem List",
+    "abbreviation": "BI",
+    "last_updated": "1999AA",
+    "language": "ENG",
+    "restriction_level": 2
+  },
+  {
+    "vocabulary": "Anatomical Therapeutic Chemical Classification System",
+    "abbreviation": "ATC",
+    "last_updated": "2021AB",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Authorized Osteopathic Thesaurus",
+    "abbreviation": "AOT",
+    "last_updated": "2006AD",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Alcohol and Other Drug Thesaurus",
+    "abbreviation": "AOD",
+    "last_updated": "2002AC",
+    "language": "ENG",
+    "restriction_level": 0
+  },
+  {
+    "vocabulary": "Alternative Billing Concepts",
+    "abbreviation": "ALT",
+    "last_updated": "2009AA",
+    "language": "ENG",
+    "restriction_level": 3
+  },
+  {
+    "vocabulary": "AI/RHEUM",
+    "abbreviation": "AIR",
+    "last_updated": "1995AA",
+    "language": "ENG",
+    "restriction_level": 0
+  }
+]

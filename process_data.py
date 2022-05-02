@@ -17,7 +17,6 @@ nltk.download('stopwords', quiet=True)
 nltk.download('wordnet', quiet=True)
 nltk.download('omw-1.4', quiet=True)
 
-
 def repartition_visualisation(data, config):
     """Save the visualisation of the repartition of the data.
 
@@ -39,7 +38,7 @@ def repartition_visualisation(data, config):
     plt.close(fig)
     # Take 10% of the data and profile report
     rows = data.sample(frac=0.10)
-    profile = ProfileReport(rows, title="est report", progress_bar=False,
+    profile = ProfileReport(rows, title="Profile report", progress_bar=False,
                             vars={"num": {"low_categorical_threshold": 0}})
     profile.to_file("artefact/panda_report_output.html")
     mlflow.log_artifact("artefact/panda_report_output.html")
@@ -60,6 +59,9 @@ def save_preprocess_data(data):
     end = time.time()
     print(f"Saving done in {end - start} seconds")
 
+def remove_tags(text):
+    TAG_RE = re.compile(r'<[^>]+>')
+    return TAG_RE.sub('', text)
 
 def utils_preprocessing_corpus(text, stopwords=None, stemming=False, lemmitization=False):
     """This function prepare the corpus for the model.
@@ -76,6 +78,8 @@ def utils_preprocessing_corpus(text, stopwords=None, stemming=False, lemmitizati
         return ""
     # Convert text to lowercase
     text = text.lower()
+    # Remove HTML tags
+    text = remove_tags(text)
     # Remove links
     text = re.sub(r'https?:\/\/.*[\r\n]*', '', text, flags=re.MULTILINE)
     # Remove punctuation
@@ -120,33 +124,11 @@ def preprocess(config):
     mlflow.log_param("nb_rows", nb_rows)
 
     ######################################################################################
-    # Preprocessing Numerical data
-
-    # Prepare the nb_parents and nb_children to be used in the model
-    mean_all_parents = data['Nb_Parents'].mean()
-    mean_all_children = data['Nb_Children'].mean()
-    data.loc[data['Nb_Parents'].isnull(), 'Nb_Parents'] = mean_all_parents
-    data.loc[data['Nb_Children'].isnull(), 'Nb_Children'] = mean_all_children
-
-    # Normalize the data
-    data['Nb_Parents'] = (data['Nb_Parents'] - data['Nb_Parents'].min()) / \
-        (data['Nb_Parents'].max() - data['Nb_Parents'].min())
-    data['Nb_Children'] = (data['Nb_Children'] - data['Nb_Children'].min()) / \
-        (data['Nb_Children'].max() - data['Nb_Children'].min())
-
-    ######################################################################################
-
-    ######################################################################################
     # Preprocessing Textual data
 
     stopwords = nltk.corpus.stopwords.words("english")
-    data.loc[:, "Clean_Definition"] = data.loc[:, "Definition"].apply(
+    data.loc[:, "Clean_Corpus"] = data.loc[:, "Corpus"].apply(
         utils_preprocessing_corpus, args=(stopwords, config["stemming"], config["lemmitization"]))
-    # Concatenate Label and Clean_Definition in corpus
-    label_lowercase = data.loc[:, "Label"].apply(
-        lambda x: utils_preprocessing_corpus(x, None, config["stemming"], config["lemmitization"]))
-    data.loc[:, "Clean_Definition"] = label_lowercase + \
-        " " + data.loc[:, "Clean_Definition"]
 
     ######################################################################################
     end = time.time()

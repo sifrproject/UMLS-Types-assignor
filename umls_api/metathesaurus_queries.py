@@ -5,6 +5,9 @@ from umls_api.authentication_umls_api import Authentication
 from umls_api.mysql_connection import DatabaseConnection
 from umls_api.languages import Languages
 
+f = open('umls_api/sources.json', 'r')
+sources = json.load(f)
+f.close()
 
 def sort_tuple(tup: List[Tuple[str, str, str, str, str]]):
     """Sorts a list of tuples alphabetically
@@ -43,6 +46,11 @@ def remove_duplicated(tup: List[Tuple[str, str, str, str, str]]):
                 and item[4] == tup[index - 1][4]:
             tup.pop(index)
     return tup
+
+
+def get_tuple_of_languages_sources(language=Languages.ENG):
+    global sources
+    return tuple([source['abbreviation'] for source in sources if source['language'] == language.value])
 
 
 class MetathesaurusQueries:
@@ -217,13 +225,45 @@ class MetathesaurusQueries:
         res = self.db.execute_query(query, False)
         return len(res[0].split("."))
 
-    def get_all_unique_terms(self):
+    def get_all_unique_terms(self, nb_data=0, offset=None) -> List[Tuple[str, str]]:
         """Returns all unique terms in the database
 
         Returns:
-            list: A list of all unique terms [(CUI, AUI, SAB, STR, TUI)]
+            list: A list of all unique terms [(CUI, TUI)]
         """
-        query = "SELECT DISTINCT a.cui, a.aui, a.sab, a.str, b.tui from MRCONSO a, MRSTY b \
+        query = "SELECT DISTINCT a.cui, b.tui from MRCONSO a, MRSTY b \
             WHERE a.cui=b.cui AND a.ISPREF='Y' AND a.LAT='ENG' AND a.STT='PF' AND a.TS='P'"
+        if nb_data != 0 and nb_data is not None:
+            query += " LIMIT " + str(nb_data)
+            if offset:
+                query += " OFFSET " + str(offset)
+        res = self.db.execute_query(query, True)
+        return res
+
+    def get_all_definitions_from_cui(self, cui: str):
+        """Returns all definitions of a concept given its CUI
+
+        Args:
+            cui (str): The CUI of the concept
+
+        Returns:
+            list: A list of all definitions [(DEF)]
+        """
+        list_eng_sources = get_tuple_of_languages_sources(Languages.ENG)
+        query = f"SELECT def FROM MRDEF WHERE cui='{cui}' AND sab IN {list_eng_sources}"
+        res = self.db.execute_query(query, True)
+        return res
+
+    def get_all_labels_from_cui(self, cui: str):
+        """Returns all labels of a concept given its CUI
+
+        Args:
+            cui (str): The CUI of the concept
+
+        Returns:
+            list: A list of all labels [(STR)]
+        """
+        query = f"SELECT ANY_VALUE(str) FROM MRCONSO WHERE cui='{cui}' AND lat='ENG' \
+            GROUP by lui  ORDER BY lui"
         res = self.db.execute_query(query, True)
         return res

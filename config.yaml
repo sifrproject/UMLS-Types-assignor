@@ -10,13 +10,13 @@ stemming: false
 lemmitization: true
 
 # Word2Vec
-vector_size: 500 # vector_size
-window: 10 # window
-w2v_epochs: 35
-sequence_length: 50 # sequence_length
+vector_size: 700 # vector_size
+window: 25 # window
+w2v_epochs: 45
+sequence_length: 60 # sequence_length
 
 # Numerical data
-numerical_data_shape: 4 # numerical_data_shape
+numerical_data_shape: 1 # numerical_data_shape
 
 # Neural network settings
 neural_network:
@@ -24,22 +24,22 @@ neural_network:
     steps:
       - name: "Input-Word-Embedding"
         type: "Input"
-        input_shape: 50 # sequence_length
+        input_shape: 60 # sequence_length
       - name: "Embedding"
         type: "Embedding"
         input_shape: None # Len of vocabulary
-        imput_length: 50 # sequence_length
-        output_shape: 500 # vector_size
+        imput_length: 60 # sequence_length
+        output_shape: 700 # vector_size
         weights: "embeddings"
         trainable: false
       - name: "LSTM-1"
         type: "LSTM"
-        units: 50 # sequence_length
+        units: 60 # sequence_length
         dropout: 0.2
         return_sequences: true
       - name: "LSTM-2"
         type: "LSTM"
-        units: 50 # sequence_length
+        units: 60 # sequence_length
         dropout: 0.2
         return_sequences: false
       - name: "Dense-1-WE"
@@ -50,20 +50,20 @@ neural_network:
     steps:
       - name: "Input-Multi-Layer-Perceptron"
         type: "Input"
-        input_shape: 4 # numerical_data_shape
+        input_shape: 1 # numerical_data_shape
       - name: "Dense-1-MLP"
         type: "Dense"
-        units: 8
+        units: 6
         activation: "relu"
       - name: "Dense-2-MLP"
         type: "Dense"
-        units: 4
+        units: 2
         activation: "relu"
   concatenate:
     steps:
       - name: "Dense-1"
         type: "Dense"
-        units: 32
+        units: 64
         activation: "relu"
   out:
     name: "Final-Dense"
@@ -85,5 +85,5 @@ neural_network:
   loss: "sparse_categorical_crossentropy"
   metrics: [] # Unused
   batch_size: 64
-  epochs: 30
+  epochs: 60
   shuffle: true

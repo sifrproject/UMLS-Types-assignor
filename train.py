@@ -50,13 +50,11 @@ def get_train_test_data(data, config):
     y_train = df_train[column].values
     y_test = df_test[column].values
 
-    X_train_attributes = df_train.loc[:, [
-        'Nb_Parents', 'Nb_Children', 'Nb_Parents_Children_Known', 'Has_Definition']].values
-    X_test_attributes = df_test.loc[:, [
-        'Nb_Parents', 'Nb_Children', 'Nb_Parents_Children_Known', 'Has_Definition']].values
+    X_train_attributes = df_train.loc[:, ['Has_Definition']].values
+    X_test_attributes = df_test.loc[:, ['Has_Definition']].values
 
-    X_train_corpus = df_train["Clean_Definition"].values
-    X_test_corpus = df_test["Clean_Definition"].values
+    X_train_corpus = df_train["Clean_Corpus"].values
+    X_test_corpus = df_test["Clean_Corpus"].values
 
     return X_train_attributes, X_test_attributes, X_train_corpus, X_test_corpus, y_train, y_test
 
@@ -99,11 +97,11 @@ def train_w2v(train_corpus, config):
 
     # Detect Bigrams (eg. ['I am', 'a student', '.'])
     bigrams_detector = gensim.models.phrases.Phrases(lst_corpus, delimiter=" ",
-                                                     min_count=5, threshold=10)
+                                                     min_count=10, threshold=20)
     bigrams_detector = gensim.models.phrases.Phraser(bigrams_detector)
     # Detect Trigrams (eg. ['I am a', 'student.'])
     trigrams_detector = gensim.models.phrases.Phrases(bigrams_detector[lst_corpus],
-                                                      delimiter=" ", min_count=5, threshold=10)
+                                                      delimiter=" ", min_count=10, threshold=20)
     trigrams_detector = gensim.models.phrases.Phraser(trigrams_detector)
 
     # Fit Word2Vec

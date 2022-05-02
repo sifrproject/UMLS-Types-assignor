@@ -11,23 +11,18 @@ from umls_api.semantic_network_queries import SemanticNetworkQueries
 from umls_api.authentication_umls_api import Authentication
 
 
-def print_description(concept_label: str, concept_sab: str, concept_cui: str,
-                      concept_sty_label: str, concept_tui: str):
+def print_description(concept_cui: str, concept_tui: str, concept_gui: str):
     """Print the description of a concept
 
     Args:
-        concept_label (str): _description_
-        concept_sab (str): _description_
-        concept_cui (str): _description_
-        concept_sty_label (str): _description_
-        concept_tui (str): _description_
+        concept_cui (str): CUI of the concept
+        concept_tui (str): TUI of the concept
+        concept_gui (str): GUI of the concept
     """
     print("\n")
-    print("label", concept_label)
-    print("sab", concept_sab)
     print("cui", concept_cui)
-    print("sty_label", concept_sty_label)
     print("tui", concept_tui)
+    print("gui", concept_gui)
     print("\n")
 
 
@@ -54,9 +49,7 @@ def save_to_csv(X_data: list, Y_data: list, db_index: int):
         Y_data (list): Y data
         db_index (int): Index of the database
     """
-    data = pd.DataFrame(X_data, columns=['Label', 'Source', 'CUI',
-                                         'Nb_Parents', 'Nb_Children', 'Nb_Parents_Children_Known',
-                                         'Definition', 'Has_Definition'])
+    data = pd.DataFrame(X_data, columns=['CUI', 'Corpus', 'Has_Definition'])
     data = pd.concat(
         [data, pd.DataFrame(Y_data, columns=['TUI', 'GUI'])], axis=1)
     # Save X and Y in the same csv file
@@ -87,82 +80,56 @@ def generate_source_data(limit: int, verbose=False):
 
     meta = MetathesaurusQueries(db)
     sty = SemanticNetworkQueries(db)
-    auth = Authentication(UMLS_API_KEY)
 
     gui_indexes = {}
     all_gui = sty.get_all_gui()
     for item in all_gui:
         gui_indexes[item[1]] = item[0]
 
-    # res = meta.get_all_unique_terms() # ! delete me
-    # deleteme = []
-    # # Save res in a csv file
-    # for i in res:
-    #     deleteme.append([
-    #         i[0],
-    #         i[1],
-    #         i[2],
-    #         i[3],
-    #         i[4],
-    #         gui_indexes[i[4]],
-    #     ])
-    # data = pd.DataFrame(deleteme, columns=['CUI', 'AUI', 'SAB', 'STR', 'TUI', 'GUI'])
-    # data.to_csv('artefact/analyse.csv', index=False)
-
-    # exit(0)
-
-    res = meta.get_all_mrcon_with_sty(nb_data=limit, offset=db_index)
+    res = meta.get_all_unique_terms(nb_data=limit, offset=db_index)
     count = 0
     X_data = []
     Y_data = []
     try:
-        for (label, sab, cui, lui, sty_label, tui) in res:
+        for (cui, tui) in res:
+            gui = gui_indexes[tui]
             if verbose:
-                print_description(label, sab, cui, sty_label, tui)
+                print_description(cui, tui, gui)
 
-            source = sab
-            aui = meta.get_aui_from_cui_and_source_and_lui(cui, source, lui)
-            nb_parents = -1
-            nb_children = -1
-            if aui:
-                nb_parents_children_known = 1
-                if verbose:
-                    print("Getting number of ancestors...")
-                nb_parents = meta.get_nb_all_parents_from_aui_and_umls_api(
-                    auth, aui)
-                if verbose:
-                    print("Getting number of descendants...")
-                nb_children = meta.get_nb_all_children_from_aui_and_umls_api(
-                    auth, aui)
-                if nb_children == -1 and nb_parents == -1:
-                    nb_parents_children_known = 0
-                else:
-                    nb_parents = 0 if nb_parents == -1 else nb_parents
-                    nb_children = 0 if nb_children == -1 else nb_children
-            else:
-                nb_parents_children_known = 0
+            if verbose:
+                print("Getting labels...")
+            try:
+                labels = " ".join(list(map(lambda x: x[0], meta.get_all_labels_from_cui(cui))))
+            except Exception as e:
+                labels = ""
+                print(str(e))
+            if verbose:
+                print("Done.")
 
             if verbose:
                 print("Getting definition...")
-            definition = meta.get_definition_from_cui_and_source(cui, source)
+            try:
+                definitions = " ".join(list(map(lambda x: x[0], meta.get_all_definitions_from_cui(cui))))
+            except Exception as e:
+                definitions = ""
+                print(str(e))
             if verbose:
                 print("Done.")
+
             has_definition = True
-            if not definition:
+            if definitions == "":
                 has_definition = False
 
+            # Corpus is the concatenation of all the labels and definitions
+            corpus = labels + " " + definitions
+
             row = [
-                label,
-                sab,
                 cui,
-                nb_parents if nb_parents != -1 else NaN,
-                nb_children if nb_children != -1 else NaN,
-                1 if nb_parents_children_known else 0,
-                definition,
+                corpus,
                 1 if has_definition else 0,
             ]
             X_data.append(row)
-            Y_data.append([tui, gui_indexes[tui]])
+            Y_data.append([tui, gui])
             count += 1
             if verbose:
                 print("\n")
