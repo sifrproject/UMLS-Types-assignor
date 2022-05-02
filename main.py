@@ -42,11 +42,11 @@ def main():
     parser.add_argument(
         '--verbose', help='Active verbose mode.', action='store_true')
     parser.add_argument('--only_source', help='Pipeline launchs only the generation of the \
-        source data.')
+        source data.', action='store_true')
     parser.add_argument('--only_preprocess', help='Pipeline launchs only the preprocess of the \
-        source data.')
+        source data.', action='store_true')
     parser.add_argument('--only_training', help='Pipeline launchs only the training of the \
-        preprocessed data.')
+        preprocessed data.', action='store_true')
     parser.add_argument('--limit', type=int,
                         help='Limit of the source data number generated.')
     parser.add_argument('--debug_output_path', type=str,
