@@ -137,6 +137,8 @@ def preprocess(config):
     ######################################################################################
     end = time.time()
     print(f"Preprocessing done in {end - start} seconds")
+    # Drop "Corpus" column
+    data = data.drop(columns=["Corpus"])
     save_preprocess_data(data)
     repartition_visualisation(data, config)
     return data
