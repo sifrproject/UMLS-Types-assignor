@@ -67,14 +67,14 @@ def main():
     only_training = args.only_training
     limit = args.limit if args.limit else None
 
-    if limit is None and config["verbose"]:
+    all = not (only_source or only_preprocess or only_training)
+
+    if limit is None and config["verbose"] and (only_source or all):
         answer = input("You are running pipeline with the entire source data. \
             It'll be long to generate all data. Are you sure to continue ? [y/n]")
         if answer == 'n':
             print("Quitting")
             sys.exit(0)
-
-    all = not (only_source or only_preprocess or only_training)
 
     with mlflow.start_run(run_name="test_mlflow"):
 
