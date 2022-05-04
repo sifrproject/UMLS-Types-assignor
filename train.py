@@ -4,6 +4,7 @@ import shutil
 # Data
 import pandas as pd
 import numpy as np
+from imblearn.over_sampling import SMOTE
 
 # Plotting
 import matplotlib.pyplot as plt
@@ -21,6 +22,8 @@ from keras.utils.vis_utils import plot_model  # Plot
 
 import mlflow
 import mlflow.keras
+
+from process_data import repartition_visualisation_graph
 
 
 def get_processed_data():
@@ -581,7 +584,24 @@ def train_and_test(config):
     # Word2Vec
     X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary = word2vec(
         X_train_corpus, X_test_corpus, config)
-
+    
+    # Concatenate word embedding and attributes
+    data_train = np.concatenate((X_train_word_embedding, X_train_attributes), axis=1)
+    
+    smote = SMOTE(ratio="minority", random_state = 101)
+    X, y_train = smote.fit_resample(data_train, y_train)
+    
+    nb_attributes = config["numerical_data_shape"]
+    X_train_word_embedding = X[:, :-nb_attributes]
+    X_train_attributes = X[:, -nb_attributes:]
+    
+    # Set up panda dataframe with word embedding and attributes and y
+    column = config["y_classificaton_column"]
+    datafram = pd.DataFrame()
+    datafram[column] = y_train
+    repartition_visualisation_graph(datafram, "artefact/stom.png", config)
+    exit(0)
+    
     # Train the model
     model, history = train_model(X_train_attributes, X_train_word_embedding,
                                  y_train, max_class, nlp, dic_vocabulary, config)

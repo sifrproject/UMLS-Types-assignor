@@ -17,6 +17,24 @@ nltk.download('stopwords', quiet=True)
 nltk.download('wordnet', quiet=True)
 nltk.download('omw-1.4', quiet=True)
 
+def repartition_visualisation_graph(data, path, config):
+    """This function create a graph of the repartition of the data.
+
+    Args:
+        data (Dataframe): dataframe with the preprocessed data
+        path (str): path to save the graph
+        config (dict): configuration options
+    """
+    # Plotting the univariate distribution of the data
+    column = config["y_classificaton_column"]
+
+    fig, ax = plt.subplots()
+    fig.suptitle("Repartitions of " + column + "s", fontsize=12)
+    data[column].reset_index().groupby(column).count().sort_values(by="index")\
+    .plot(kind="barh", legend=False, ax=ax).grid(axis='x')
+    fig.savefig(path)
+    plt.close(fig)
+
 def repartition_visualisation(data, config):
     """Save the visualisation of the repartition of the data.
 
@@ -27,16 +45,8 @@ def repartition_visualisation(data, config):
     if data is None:
         print("Error: data is None")
         return
-    # Plotting the univariate distribution of the data
-    column = config["y_classificaton_column"]
-
-    fig, ax = plt.subplots()
-    fig.suptitle("Repartitions of " + column + "s", fontsize=12)
-    data[column].reset_index().groupby(column).count().sort_values(by="index")\
-    .plot(kind="barh", legend=False, ax=ax).grid(axis='x')
-    fig.savefig('artefact/repartitions.png')
-    plt.close(fig)
-    # Take 10% of the data and profile report
+    repartition_visualisation_graph(data, "artefact/repartitions.png", config)
+    # # Take 10% of the data and profile report
     rows = data.sample(frac=0.10)
     profile = ProfileReport(rows, title="Profile report", progress_bar=False,
                             vars={"num": {"low_categorical_threshold": 0}})
