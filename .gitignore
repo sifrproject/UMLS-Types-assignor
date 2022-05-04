@@ -9,6 +9,7 @@ preprocessed_data.csv
 results.png
 training.png
 mlruns
+artefact/wordcloud*
 artefact/models
 artefact/panda_report_output.html
 artefact/repartitions.png

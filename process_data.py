@@ -9,13 +9,46 @@ import mlflow
 # Data
 import pandas as pd
 import matplotlib.pyplot as plt
-from pandas_profiling import ProfileReport
+from wordcloud import WordCloud
 
 # Preprocessing
 import nltk
 nltk.download('stopwords', quiet=True)
 nltk.download('wordnet', quiet=True)
 nltk.download('omw-1.4', quiet=True)
+
+
+def save_the_most_frequent_words(data, column, config):
+    """This function save the most frequent words for each different column.
+
+    Args:
+        data (Dataframe): dataframe with the preprocessed data
+        column (str): column to save the most frequent words
+        config (dict): configuration options
+    """
+    class_col = config["y_classificaton_column"]
+    # Get only "Clean_Corpus" which has in "y_classificaton_column" the value of column var
+    pd = data[data[class_col] == column]
+    wordcloud = WordCloud(background_color='white', max_words=5).generate(
+        pd['Clean_Corpus'].str.cat(sep=' '))
+    path = 'artefact/wordcloud-' + column + '.png'
+    wordcloud.to_file(path)
+    mlflow.log_artifact(path)
+
+
+def generate_all_wordclouds(data, config):
+    """This function generate all the wordclouds.
+
+    Args:
+        data (Dataframe): dataframe with the preprocessed data
+        config (dict): configuration options
+    """
+    # Save the most frequent words for each different column
+    column = config["y_classificaton_column"]
+    labels = data[column].unique()
+    for label in labels:
+        save_the_most_frequent_words(data, label, config)
+
 
 def repartition_visualisation_graph(data, path, config):
     """This function create a graph of the repartition of the data.
@@ -31,9 +64,11 @@ def repartition_visualisation_graph(data, path, config):
     fig, ax = plt.subplots()
     fig.suptitle("Repartitions of " + column + "s", fontsize=12)
     data[column].reset_index().groupby(column).count().sort_values(by="index")\
-    .plot(kind="barh", legend=False, ax=ax).grid(axis='x')
+        .plot(kind="barh", legend=False, ax=ax).grid(axis='x')
     fig.savefig(path)
     plt.close(fig)
+    mlflow.log_artifact(path)
+
 
 def repartition_visualisation(data, config):
     """Save the visualisation of the repartition of the data.
@@ -63,9 +98,11 @@ def save_preprocess_data(data):
     end = time.time()
     print(f"Saving done in {end - start} seconds")
 
+
 def remove_tags(text):
     TAG_RE = re.compile(r'<[^>]+>')
     return TAG_RE.sub('', text)
+
 
 def utils_preprocessing_corpus(text, stopwords=None, stemming=False, lemmitization=False):
     """This function prepare the corpus for the model.
@@ -141,4 +178,5 @@ def preprocess(config):
     data = data.drop(columns=["Corpus"])
     save_preprocess_data(data)
     repartition_visualisation(data, config)
+    generate_all_wordclouds(data, config)
     return data
