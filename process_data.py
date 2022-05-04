@@ -46,12 +46,6 @@ def repartition_visualisation(data, config):
         print("Error: data is None")
         return
     repartition_visualisation_graph(data, "artefact/repartitions.png", config)
-    # # Take 10% of the data and profile report
-    rows = data.sample(frac=0.10)
-    profile = ProfileReport(rows, title="Profile report", progress_bar=False,
-                            vars={"num": {"low_categorical_threshold": 0}})
-    profile.to_file("artefact/panda_report_output.html")
-    mlflow.log_artifact("artefact/panda_report_output.html")
 
 
 def save_preprocess_data(data):
