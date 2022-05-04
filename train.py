@@ -76,7 +76,10 @@ def create_list_unigrams(corpus):
     """
     lst_corpus = []
     for string in corpus:
-        lst_words = string.split()
+        try:
+            lst_words = string.split()
+        except:
+            lst_words = [""]
         lst_grams = [" ".join(lst_words[i:i+1])
                      for i in range(0, len(lst_words), 1)]
         if len(lst_grams) == 0:
