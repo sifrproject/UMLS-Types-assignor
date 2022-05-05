@@ -591,7 +591,7 @@ def train_and_test(config):
     # Concatenate word embedding and attributes
     data_train = np.concatenate((X_train_word_embedding, X_train_attributes), axis=1)
     
-    smote = SMOTE(ratio="minority", random_state = 101)
+    smote = SMOTE(random_state=42)
     X, y_train = smote.fit_resample(data_train, y_train)
     
     nb_attributes = config["numerical_data_shape"]
