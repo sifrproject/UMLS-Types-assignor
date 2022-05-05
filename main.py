@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import traceback
 
 # Typing
 from typing import Any
@@ -102,7 +103,7 @@ def main():
                 train_and_test(config)
             save_debug_output(config)
         except Exception as e:
-            print(str(e))
+            print(traceback.format_exc())
             save_debug_output(config)
 
 
