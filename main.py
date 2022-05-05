@@ -52,6 +52,8 @@ def main():
         source data.', action='store_true')
     parser.add_argument('--only_preprocess', help='Pipeline launchs only the preprocess of the \
         source data.', action='store_true')
+    parser.add_argument('--from_preprocess', help='Pipeline launchs from the preprocess of the \
+        source data.', action='store_true')
     parser.add_argument('--only_training', help='Pipeline launchs only the training of the \
         preprocessed data.', action='store_true')
     parser.add_argument('--limit', type=int,
@@ -71,6 +73,7 @@ def main():
 
     only_source = args.only_source
     only_preprocess = args.only_preprocess
+    from_preprocess = args.from_preprocess
     only_training = args.only_training
     limit = args.limit if args.limit else None
 
@@ -93,9 +96,9 @@ def main():
         try:
             if only_source or all:
                 generate_source_data(limit, config["verbose"])
-            if only_preprocess or all:
+            if from_preprocess or only_preprocess or all:
                 preprocess(config)
-            if only_training or all:
+            if from_preprocess or only_training or all:
                 train_and_test(config)
             save_debug_output(config)
         except Exception as e:
