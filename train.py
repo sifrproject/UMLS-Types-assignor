@@ -103,11 +103,11 @@ def train_w2v(train_corpus, config):
 
     # Detect Bigrams (eg. ['I am', 'a student', '.'])
     bigrams_detector = gensim.models.phrases.Phrases(lst_corpus, delimiter=" ",
-                                                     min_count=10, threshold=20)
+                                                     min_count=5, threshold=10)
     bigrams_detector = gensim.models.phrases.Phraser(bigrams_detector)
     # Detect Trigrams (eg. ['I am a', 'student.'])
     trigrams_detector = gensim.models.phrases.Phrases(bigrams_detector[lst_corpus],
-                                                      delimiter=" ", min_count=10, threshold=20)
+                                                      delimiter=" ", min_count=5, threshold=10)
     trigrams_detector = gensim.models.phrases.Phraser(trigrams_detector)
 
     # Fit Word2Vec
@@ -153,8 +153,11 @@ def train_w2v(train_corpus, config):
             f"It means that there are {X_train_word_embedding.shape[0]} words in the model.")
         print(
             f"And each word has {X_train_word_embedding.shape[1]} dimensions' vector.\n")
-        length_largest = len(max(train_corpus, key=len).split(' '))
-        print("Highest length of definitions: ", length_largest)
+        try:
+            length_largest = len(max(train_corpus, key=len).split(' '))
+            print("Highest length of definitions: ", length_largest)
+        except Exception as e:
+            print(str(e))
     return X_train_word_embedding, bigrams_detector, trigrams_detector, \
         tokenizer, nlp, dic_vocabulary
 
@@ -584,21 +587,21 @@ def train_and_test(config):
     X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary = word2vec(
         X_train_corpus, X_test_corpus, config)
     
-    # Concatenate word embedding and attributes
-    data_train = np.concatenate((X_train_word_embedding, X_train_attributes), axis=1)
+    # # Concatenate word embedding and attributes
+    # data_train = np.concatenate((X_train_word_embedding, X_train_attributes), axis=1)
     
-    smote = SMOTE(random_state=42)
-    X, y_train = smote.fit_resample(data_train, y_train)
+    # smote = SMOTE(random_state=42)
+    # X, y_train = smote.fit_resample(data_train, y_train)
     
-    nb_attributes = config["numerical_data_shape"]
-    X_train_word_embedding = X[:, :-nb_attributes]
-    X_train_attributes = X[:, -nb_attributes:]
+    # nb_attributes = config["numerical_data_shape"]
+    # X_train_word_embedding = X[:, :-nb_attributes]
+    # X_train_attributes = X[:, -nb_attributes:]
     
-    # Set up panda dataframe with word embedding and attributes and y
-    column = config["y_classificaton_column"]
-    datafram = pd.DataFrame()
-    datafram[column] = y_train
-    repartition_visualisation_graph(datafram, "artefact/stom.png", config)
+    # # Set up panda dataframe with word embedding and attributes and y
+    # column = config["y_classificaton_column"]
+    # datafram = pd.DataFrame()
+    # datafram[column] = y_train
+    # repartition_visualisation_graph(datafram, "artefact/smote.png", config)
     
     # Train the model
     model, history = train_model(X_train_attributes, X_train_word_embedding,
