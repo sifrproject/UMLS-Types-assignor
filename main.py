@@ -105,6 +105,7 @@ def main():
         except Exception as e:
             print(traceback.format_exc())
             save_debug_output(config)
+            raise Exception("PIPELINE FAILED: " + str(e) + "\n" + traceback.format_exc())
 
 
 if __name__ == "__main__":
