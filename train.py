@@ -603,7 +603,6 @@ def train_and_test(config):
     datafram = pd.DataFrame()
     datafram[column] = y_train
     repartition_visualisation_graph(datafram, "artefact/stom.png", config)
-    exit(0)
     
     # Train the model
     model, history = train_model(X_train_attributes, X_train_word_embedding,
