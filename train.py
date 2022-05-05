@@ -533,10 +533,6 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
     mlflow.log_artifact("artefact/model_plot.png")
     mlflow.log_artifact("artefact/training.png")
     mlflow.log_artifact("artefact/results.png")
-    # Add output log to mlflow log if debug_output_path is file
-    if config["debug_output_path"] and len(config["debug_output_path"]) > 0 \
-            and os.path.isfile(config["debug_output_path"]):
-        mlflow.log_artifact(config["debug_output_path"])
 
     # log model
     mlflow.keras.log_model(model, "model")

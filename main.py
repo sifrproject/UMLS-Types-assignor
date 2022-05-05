@@ -33,6 +33,13 @@ def load_config(config_name: str) -> Any:
         return yaml.safe_load(file)
 
 
+def save_debug_output(config: dict) -> None:
+    # Add output log to mlflow log if debug_output_path is file
+    if config["debug_output_path"] and len(config["debug_output_path"]) > 0 \
+            and os.path.isfile(config["debug_output_path"]):
+        mlflow.log_artifact(config["debug_output_path"])
+
+
 def main():
     """Main function of the pipeline
     """
@@ -83,12 +90,17 @@ def main():
         print(f"MLflow Run ID: {str(run_uuid)}")
         mlflow.log_param("run_uuid", run_uuid)
 
-        if only_source or all:
-            generate_source_data(limit, config["verbose"])
-        if only_preprocess or all:
-            preprocess(config)
-        if only_training or all:
-            train_and_test(config)
+        try:
+            if only_source or all:
+                generate_source_data(limit, config["verbose"])
+            if only_preprocess or all:
+                preprocess(config)
+            if only_training or all:
+                train_and_test(config)
+            save_debug_output(config)
+        except Exception as e:
+            print(str(e))
+            save_debug_output(config)
 
 
 if __name__ == "__main__":
