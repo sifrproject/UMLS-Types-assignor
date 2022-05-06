@@ -78,7 +78,7 @@ def main():
     only_training = args.only_training
     limit = args.limit if args.limit else None
 
-    all = not (only_source or only_preprocess or only_training)
+    all = not (only_source or only_preprocess or only_training or from_preprocess)
 
     if limit is None and config["verbose"] and (only_source or all):
         try:
@@ -106,6 +106,7 @@ def main():
                 train_and_test(config)
             save_debug_output(config)
             print("Pipeline finished successfully")
+            sys.exit(0)
         except Exception as e:
             print(traceback.format_exc())
             save_debug_output(config)
