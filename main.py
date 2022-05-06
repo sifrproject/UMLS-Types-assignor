@@ -102,6 +102,7 @@ def main():
             if from_preprocess or only_training or all:
                 train_and_test(config)
             save_debug_output(config)
+            print("Pipeline finished successfully")
         except Exception as e:
             print(traceback.format_exc())
             save_debug_output(config)
