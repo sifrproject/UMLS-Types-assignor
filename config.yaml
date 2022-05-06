@@ -10,10 +10,10 @@ stemming: false
 lemmitization: true
 
 # Word2Vec
-vector_size: 300 # vector_size
-window: 8 # window
-w2v_epochs: 30
-sequence_length: 30 # sequence_length
+vector_size: 700 # vector_size
+window: 25 # window
+w2v_epochs: 45
+sequence_length: 60 # sequence_length
 
 # Numerical data
 numerical_data_shape: 1 # numerical_data_shape
@@ -24,22 +24,22 @@ neural_network:
     steps:
       - name: "Input-Word-Embedding"
         type: "Input"
-        input_shape: 30 # sequence_length
+        input_shape: 60 # sequence_length
       - name: "Embedding"
         type: "Embedding"
         input_shape: None # Len of vocabulary
-        imput_length: 30 # sequence_length
-        output_shape: 300 # vector_size
+        imput_length: 60 # sequence_length
+        output_shape: 700 # vector_size
         weights: "embeddings"
         trainable: false
       - name: "LSTM-1"
         type: "LSTM"
-        units: 30 # sequence_length
+        units: 60 # sequence_length
         dropout: 0.2
         return_sequences: true
       - name: "LSTM-2"
         type: "LSTM"
-        units: 30 # sequence_length
+        units: 60 # sequence_length
         dropout: 0.2
         return_sequences: false
       - name: "Dense-1-WE"
@@ -85,5 +85,5 @@ neural_network:
   loss: "sparse_categorical_crossentropy"
   metrics: [] # Unused
   batch_size: 64
-  epochs: 20
+  epochs: 60
   shuffle: true
