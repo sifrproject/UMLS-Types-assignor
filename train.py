@@ -539,13 +539,6 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
 
     # log model
     mlflow.keras.log_model(model, "model")
-    try:
-        shutil.rmtree("artefact/models")
-        print("Directory artefact/models removed")
-    except OSError as e:
-        print("Error: %s : %s" % ("artefact/models", e.strerror))
-    mlflow.keras.save_model(model, "artefact/models")
-
     mlflow.end_run()
 
 
@@ -587,21 +580,21 @@ def train_and_test(config):
     X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary = word2vec(
         X_train_corpus, X_test_corpus, config)
     
-    # # Concatenate word embedding and attributes
-    # data_train = np.concatenate((X_train_word_embedding, X_train_attributes), axis=1)
+    # Concatenate word embedding and attributes
+    data_train = np.concatenate((X_train_word_embedding, X_train_attributes), axis=1)
     
-    # smote = SMOTE(random_state=42)
-    # X, y_train = smote.fit_resample(data_train, y_train)
+    smote = SMOTE(random_state=42)
+    X, y_train = smote.fit_resample(data_train, y_train)
     
-    # nb_attributes = config["numerical_data_shape"]
-    # X_train_word_embedding = X[:, :-nb_attributes]
-    # X_train_attributes = X[:, -nb_attributes:]
+    nb_attributes = config["numerical_data_shape"]
+    X_train_word_embedding = X[:, :-nb_attributes]
+    X_train_attributes = X[:, -nb_attributes:]
     
-    # # Set up panda dataframe with word embedding and attributes and y
-    # column = config["y_classificaton_column"]
-    # datafram = pd.DataFrame()
-    # datafram[column] = y_train
-    # repartition_visualisation_graph(datafram, "artefact/smote.png", config)
+    # Set up panda dataframe with word embedding and attributes and y
+    column = config["y_classificaton_column"]
+    datafram = pd.DataFrame()
+    datafram[column] = y_train
+    repartition_visualisation_graph(datafram, "artefact/smote.png", config)
     
     # Train the model
     model, history = train_model(X_train_attributes, X_train_word_embedding,
