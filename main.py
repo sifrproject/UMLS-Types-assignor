@@ -99,14 +99,16 @@ def main():
 
         try:
             if only_source or all:
+                print("Generating source data...")
                 generate_source_data(limit, config["verbose"])
             if from_preprocess or only_preprocess or all:
+                print("Preprocessing source data...")
                 preprocess(config)
             if from_preprocess or only_training or all:
+                print("Train and test data...")
                 train_and_test(config)
             save_debug_output(config)
             print("Pipeline finished successfully")
-            sys.exit(0)
         except Exception as e:
             print(traceback.format_exc())
             save_debug_output(config)

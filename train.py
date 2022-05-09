@@ -569,7 +569,8 @@ def train_and_test(config):
     Args:
         config (dict): config
     """
-
+    if config["verbose"]:
+        print("Loading training / testing data...")
     # Data preparation
     data = get_processed_data()
     X_train_attributes, X_test_attributes, X_train_corpus, X_test_corpus, y_train, y_test = \
@@ -577,12 +578,16 @@ def train_and_test(config):
     max_class = data[config["y_classificaton_column"]].nunique()
 
     # Word2Vec
+    if config["verbose"]:
+        print("Loading word2vec model...")
     X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary = word2vec(
         X_train_corpus, X_test_corpus, config)
     
     # Concatenate word embedding and attributes
     data_train = np.concatenate((X_train_word_embedding, X_train_attributes), axis=1)
     
+    if config["verbose"]:
+        print("Handle imbalance data...")
     smote = SMOTE(random_state=42)
     X, y_train = smote.fit_resample(data_train, y_train)
     
@@ -597,9 +602,13 @@ def train_and_test(config):
     repartition_visualisation_graph(datafram, "artefact/smote.png", config)
     
     # Train the model
+    if config["verbose"]:
+        print("Training model...")
     model, history = train_model(X_train_attributes, X_train_word_embedding,
                                  y_train, max_class, nlp, dic_vocabulary, config)
 
     # Test the model
+    if config["verbose"]:
+        print("Testing model...")
     test_model(model, history, X_test_attributes,
                X_test_word_embedding, y_train, y_test, config)

@@ -26,6 +26,8 @@ def save_the_most_frequent_words(data, column, config):
         column (str): column to save the most frequent words
         config (dict): configuration options
     """
+    if config["verbose"]:
+        print(f"Saving the most frequent words [{column}]...")
     class_col = config["y_classificaton_column"]
     # Get only "Clean_Corpus" which has in "y_classificaton_column" the value of column var
     pd = data[data[class_col] == column]
@@ -34,6 +36,8 @@ def save_the_most_frequent_words(data, column, config):
     path = 'artefact/wordcloud-' + column + '.png'
     wordcloud.to_file(path)
     mlflow.log_artifact(path)
+    if config["verbose"]:
+        print(f"Saving done.")
 
 
 def generate_all_wordclouds(data, config):
@@ -58,6 +62,8 @@ def repartition_visualisation_graph(data, path, config):
         path (str): path to save the graph
         config (dict): configuration options
     """
+    if config["verbose"]:
+        print("Repartition graph generation...")
     # Plotting the univariate distribution of the data
     column = config["y_classificaton_column"]
 
@@ -68,6 +74,8 @@ def repartition_visualisation_graph(data, path, config):
     fig.savefig(path)
     plt.close(fig)
     mlflow.log_artifact(path)
+    if config["verbose"]:
+        print("Repartition graph saved")
 
 
 def repartition_visualisation(data, config):
