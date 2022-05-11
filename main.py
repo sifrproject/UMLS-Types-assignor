@@ -1,4 +1,5 @@
 import os
+import logging
 import sys
 import argparse
 import traceback
@@ -35,10 +36,11 @@ def load_config(config_name: str) -> Any:
 
 
 def save_debug_output(config: dict) -> None:
+    print("Saving debug output...")
     # Add output log to mlflow log if debug_output_path is file
     if config["debug_output_path"] and len(config["debug_output_path"]) > 0 \
             and os.path.isfile(config["debug_output_path"]):
-        mlflow.log_artifact(config["debug_output_path"])
+        mlflow.log_text("Debug log", config["debug_output_path"])
 
 
 def main():
@@ -98,6 +100,8 @@ def main():
         mlflow.log_param("run_uuid", run_uuid)
 
         try:
+            if config["verbose"]:
+                logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
             if only_source or all:
                 print("Generating source data...")
                 generate_source_data(limit, config["verbose"])

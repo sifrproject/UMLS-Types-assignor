@@ -69,7 +69,7 @@ def create_list_unigrams(corpus):
     """Create list of lists of Unigrams (eg. ['I', 'am', 'a', 'student', '.'])
 
     Args:
-        corpus (str): corpus
+        corpus (List[str]): corpus
 
     Returns:
         List: list of lists of Unigrams
@@ -92,7 +92,7 @@ def train_w2v(train_corpus, config):
     """Train word2vec model
 
     Args:
-        train_corpus (str): Corpus that will be trained
+        train_corpus (List[str]): Corpus that will be trained
         config (dict): config
 
     Returns:
@@ -113,7 +113,7 @@ def train_w2v(train_corpus, config):
     # Fit Word2Vec
     nlp = gensim.models.word2vec.Word2Vec(lst_corpus,
                                           vector_size=config["vector_size"],
-                                          window=config["window"], min_count=1, sg=1,
+                                          window=config["window"], min_count=50, sg=1,
                                           epochs=config["w2v_epochs"])
 
     if config["verbose"]:
@@ -129,7 +129,8 @@ def train_w2v(train_corpus, config):
         try:
             print(
                 f"The most similar words to '{word}' are:", nlp.wv.most_similar(word))
-        except KeyError:
+        except Exception as e:
+            print(str(e))
             print(f"The word '{word}' is not in the vocabulary")
 
     # Tokenize text -> Indexation of each word (eg. {'NaN': 1, 'enzyme': 2, 'amine': 3...})
@@ -166,7 +167,7 @@ def apply_w2v(test_corpus: str, bigrams_detector, trigrams_detector, tokenizer, 
     """Apply word2vec model to test corpus
 
     Args:
-        test_corpus (str): Corpus that will be tested
+        test_corpus (List[str]): Corpus that will be tested
         bigrams_detector (Phraser): Bigrams detector
         trigrams_detector (Phraser): Trigrams detector
         tokenizer (any): tokenizer
@@ -195,15 +196,18 @@ def word2vec(training_corpus, testing_corpus, config):
     """Train and apply word2vec model
 
     Args:
-        training_corpus (str): Corpus that will be trained
-        testing_corpus (str): Corpus that will be tested
+        training_corpus (List[str]): Corpus that will be trained
+        testing_corpus (List[str]): Corpus that will be tested
         config (dict): config
 
     Returns:
        X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary
     """
+    print("Training word2vec model...")
     X_train_word_embedding, bigrams_detector, trigrams_detector, tokenizer, nlp, dic_vocabulary = \
         train_w2v(training_corpus, config)
+    print("Word2vec model trained.")
+    print("Applying word2vec model to testing_corpus...")
     X_test_word_embedding = apply_w2v(
         testing_corpus, bigrams_detector, trigrams_detector, tokenizer, config)
     return X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary
@@ -461,6 +465,8 @@ def train_model(X_train_attributes, X_train_word_embedding, y_train, max_class, 
     Returns:
         tuple: model, training
     """
+    if config["verbose"]:
+        print("Generating model...")
     model = get_model(nlp, dic_vocabulary, max_class, config)
 
     # Encode y_train
@@ -474,6 +480,8 @@ def train_model(X_train_attributes, X_train_word_embedding, y_train, max_class, 
     batch_size = config["neural_network"]["batch_size"]
     shuffle = config["neural_network"]["shuffle"]
     verbose = config["verbose"]
+    if config["verbose"]:
+        print("Training / Fitting model...")
     training = model.fit(x=[X_train_word_embedding, X_train_attributes], y=y_train,
                          batch_size=batch_size, epochs=epochs, shuffle=shuffle, verbose=verbose,
                          validation_split=config["test_size"])
