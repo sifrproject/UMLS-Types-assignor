@@ -26,13 +26,22 @@ import mlflow.keras
 from process_data import repartition_visualisation_graph
 
 
-def get_processed_data():
+def get_processed_data(config):
     """Get preprocessed data stored in artefact/preprocessed_data.csv
+
+    Args:
+        config (dict): config
 
     Returns:
         DataFrame: data
     """
-    return pd.read_csv('artefact/preprocessed_data.csv')
+    data = pd.read_csv('artefact/preprocessed_data.csv')
+    column = config["y_classificaton_column"]
+    excluded = config["drop_classificaton_columns"]
+    if excluded and len(excluded) > 0:
+        # Drop rows in data[column] that have one of the values in excluded
+        data = data[~data[column].isin(excluded)]
+    return data
 
 
 def get_train_test_data(data, config):
@@ -580,7 +589,7 @@ def train_and_test(config):
     if config["verbose"]:
         print("Loading training / testing data...")
     # Data preparation
-    data = get_processed_data()
+    data = get_processed_data(config)
     X_train_attributes, X_test_attributes, X_train_corpus, X_test_corpus, y_train, y_test = \
         get_train_test_data(data, config)
     max_class = data[config["y_classificaton_column"]].nunique()
