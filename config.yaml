@@ -1,7 +1,8 @@
 # Initial settings
 verbose: true
 y_classificaton_column: "GUI" # Column which contains the classification result
-drop_columns: []
+drop_classificaton_columns: []
+max_nb_data_per_class: 0 # Maximum number of rows to be classified. 0 if no limit
 test_size: 0.3 # Percentage of data used for testing
 debug_output_path: ""
 
