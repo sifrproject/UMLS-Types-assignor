@@ -98,6 +98,7 @@ def main():
         run_uuid = mlflow.active_run().info.run_uuid
         print(f"MLflow Run ID: {str(run_uuid)}")
         mlflow.log_param("run_uuid", run_uuid)
+        mlflow.log_dict(config, "config.yaml")
 
         try:
             if config["verbose"]:

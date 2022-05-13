@@ -534,7 +534,6 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
     mlflow.log_param("w2c_window", config["window"])
     mlflow.log_param("w2c_epoch", config["w2v_epochs"])
     mlflow.log_param("w2c_sequence_length", config["sequence_length"])
-    mlflow.log_dict(config, "config.yaml")
 
     # Calculate metrics
     binary_loss = get_binary_loss(history)
