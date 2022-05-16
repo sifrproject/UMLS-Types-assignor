@@ -10,9 +10,13 @@ import mlflow
 import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+from sklearn.feature_extraction.text import CountVectorizer
+import numpy as np
 
 # Preprocessing
 import nltk
+
+from umls_api.metathesaurus_queries import get_tuple_of_languages_sources
 nltk.download('stopwords', quiet=True)
 nltk.download('wordnet', quiet=True)
 nltk.download('omw-1.4', quiet=True)
@@ -150,6 +154,43 @@ def utils_preprocessing_corpus(text, stopwords=None, stemming=False, lemmitizati
     text = " ".join(text)
     return text
 
+def one_hot_encoding_sabs(sabset, l_sab):
+    sabs = l_sab.split("/")
+    return np.array([1 if x in sabs else 0 for x in sabset])
+
+# Preprocessing BoW Labels- One-hot encoding of the labels
+def get_preprocessed_labels_count(data):
+    """This function get the preprocessed labels.
+
+    Args:
+        data (pd.DataFrame): dataframe with the preprocessed data
+
+    Returns:
+        pd.DataFrame: dataframe with the preprocessed labels
+    """
+    # List of each words in data["Clean_corpus"]
+    wordset = pd.Series([y for x in data["Clean_Corpus"].str.split() for y in x]).unique()
+    cvec = CountVectorizer(vocabulary=wordset, ngram_range=(1, 2))
+    
+    labels_count_np = data["Labels"].apply(lambda x: cvec.fit_transform([x]).toarray()[0]).values
+    
+    return labels_count_np
+
+# Preprocessing BoW SAB - One-hot encoding of the sources
+def get_preprocessed_sab(data):
+    """This function preprocess the SAB column.
+
+    Args:
+        data (pd.Dataframe): dataframe with the preprocessed data
+
+    Returns:
+        pd.Dataframe: dataframe with the preprocessed data
+    """
+    all_sources = get_tuple_of_languages_sources()
+    sabset = [x for x in all_sources]
+    # Create a one-hot encoding of the SAB column from sabset
+    values = data["SAB"].apply(lambda x: one_hot_encoding_sabs(sabset, x)).values
+    return values
 
 def preprocess(config):
     """This function preprocess the data.
@@ -173,17 +214,20 @@ def preprocess(config):
     mlflow.log_param("nb_rows", nb_rows)
 
     ######################################################################################
-    # Preprocessing Textual data
+    # Preprocessing Corpus - Cleaning corpus
 
     stopwords = nltk.corpus.stopwords.words("english")
     data.loc[:, "Clean_Corpus"] = data.loc[:, "Corpus"].apply(
         utils_preprocessing_corpus, args=(stopwords, config["stemming"], config["lemmitization"]))
+    # Put Prefered_Label in front of "Clean_Corpus" value
+    data["Clean_Corpus"] = data["Prefered_Label"] + " " + data["Clean_Corpus"]
 
     ######################################################################################
+    
     end = time.time()
     print(f"Preprocessing done in {end - start} seconds")
     # Drop "Corpus" column
-    data = data.drop(columns=["Corpus"])
+    data = data.drop(columns=["Corpus", "Prefered_Label"])
     save_preprocess_data(data)
     repartition_visualisation(data, config)
     generate_all_wordclouds(data, config)

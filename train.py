@@ -1,5 +1,4 @@
-import os
-import shutil
+import time
 
 # Data
 import pandas as pd
@@ -23,7 +22,7 @@ from keras.utils.vis_utils import plot_model  # Plot
 import mlflow
 import mlflow.keras
 
-from process_data import repartition_visualisation_graph
+from process_data import get_preprocessed_labels_count, get_preprocessed_sab, repartition_visualisation_graph
 
 
 def get_processed_data(config):
@@ -36,6 +35,9 @@ def get_processed_data(config):
         DataFrame: data
     """
     data = pd.read_csv('artefact/preprocessed_data.csv')
+    data["SAB"] = get_preprocessed_sab(data)
+    data["Labels_Count"] = get_preprocessed_labels_count(data)
+    data = data.drop(columns=["Labels"])
     column = config["y_classificaton_column"]
     excluded = config["drop_classificaton_columns"]
     if excluded and len(excluded) > 0:
@@ -59,6 +61,8 @@ def get_train_test_data(data, config):
         X_train_attributes, X_test_attributes, X_train_corpus, X_test_corpus, y_train, y_test
 
     """
+    print("Splitting data...")
+    start = time.time()
     df_train, df_test = train_test_split(data, test_size=config["test_size"])
 
     # Get values
@@ -66,13 +70,47 @@ def get_train_test_data(data, config):
     y_train = df_train[column].values
     y_test = df_test[column].values
 
-    X_train_attributes = df_train.loc[:, ['Has_Definition']].values
-    X_test_attributes = df_test.loc[:, ['Has_Definition']].values
-
+    X_train_atrbts = df_train.loc[:, ['Has_Definition']].values
+    X_test_atrbts = df_test.loc[:, ['Has_Definition']].values
+    
+    arr = df_train[["Has_Definition", "SAB", "Labels_Count"]].to_numpy()
+    
+    rows = arr.shape[0]
+    col_has_def = 1
+    col_sources = arr[0][1].shape[0]
+    col_labels_count = arr[0][2].shape[0]
+    cols = col_has_def + col_sources + col_labels_count
+    if config["verbose"]:
+        print("Attributes shape")
+        print("rows", rows)
+        print(str(col_has_def) + " + " + str(col_sources) + " + " + \
+            str(col_labels_count) + " = " + str(cols))
+    
+    X_train_atrbts = None # ? Try to optimise this using only concatenate
+    for row in arr:
+        conc = np.concatenate((row[0], row[1], row[2]), axis=None)
+        
+        if X_train_atrbts is not None:
+            X_train_atrbts = np.vstack((X_train_atrbts, conc))
+        else:
+            X_train_atrbts = conc
+    
     X_train_corpus = df_train["Clean_Corpus"].values
     X_test_corpus = df_test["Clean_Corpus"].values
 
-    return X_train_attributes, X_test_attributes, X_train_corpus, X_test_corpus, y_train, y_test
+    arr = df_test[["Has_Definition", "SAB", "Labels_Count"]].to_numpy()
+    
+    X_test_atrbts = None # ? Try to optimise this using only concatenate
+    for row in arr:
+        conc = np.concatenate((row[0], row[1], row[2]), axis=None)
+        
+        if X_test_atrbts is not None:
+            X_test_atrbts = np.vstack((X_test_atrbts, conc))
+        else:
+            X_test_atrbts = conc
+            
+    print("Splitting data done in %.2f seconds" % (time.time() - start))
+    return X_train_atrbts, X_test_atrbts, X_train_corpus, X_test_corpus, y_train, y_test
 
 ######################################################################################
 # Word Embedding
@@ -273,6 +311,8 @@ def get_input_layer_and_next_steps(type_model, config):
     steps = config["neural_network"][type_model]["steps"].copy()
     # Search for the first step with the type "Input"
     first_step = next(step for step in steps if step["type"] == "Input")
+    if type_model == "multi_layer_perception":
+        first_step["input_shape"] = config["numerical_data_shape"]
     inputs = layers.Input(
         shape=first_step["input_shape"], name=first_step["name"])
     # Remove first step from the list
@@ -603,17 +643,8 @@ def train_and_test(config):
     X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary = word2vec(
         X_train_corpus, X_test_corpus, config)
     
-    # Concatenate word embedding and attributes
-    data_train = np.concatenate((X_train_word_embedding, X_train_attributes), axis=1)
-    
-    if config["verbose"]:
-        print("Handle imbalance data...")
-    smote = SMOTE(random_state=42)
-    X, y_train = smote.fit_resample(data_train, y_train)
-    
-    nb_attributes = config["numerical_data_shape"]
-    X_train_word_embedding = X[:, :-nb_attributes]
-    X_train_attributes = X[:, -nb_attributes:]
+    nb_attributes = X_train_attributes.shape[1]
+    config["numerical_data_shape"] = nb_attributes
     
     # Set up panda dataframe with word embedding and attributes and y
     column = config["y_classificaton_column"]

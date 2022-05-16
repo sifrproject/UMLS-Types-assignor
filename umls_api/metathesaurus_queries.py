@@ -48,7 +48,15 @@ def remove_duplicated(tup: List[Tuple[str, str, str, str, str]]):
     return tup
 
 
-def get_tuple_of_languages_sources(language=Languages.ENG):
+def get_tuple_of_languages_sources(language=Languages.ENG) -> Tuple[str]:
+    """Gets the tuple of languages and sources
+    
+    Args:
+        language (Languages, optional): The language to get the tuple of languages and sources. Defaults to Languages.ENG.
+        
+    Returns:
+        Tuple[str]: The tuple of sources abbreviation of the language
+    """
     global sources
     return tuple([source['abbreviation'] for source in sources if source['language'] == language.value])
 
@@ -267,3 +275,36 @@ class MetathesaurusQueries:
             GROUP by lui  ORDER BY lui"
         res = self.db.execute_query(query, True)
         return res
+    
+    def get_prefered_label_from_cui(self, cui: str):
+        """Returns the prefered label of a concept given its CUI
+
+        Args:
+            cui (str): The CUI of the concept
+            
+        Returns:
+            str: The prefered label
+        """
+        query = f"SELECT ANY_VALUE(str) from MRCONSO WHERE cui='{cui}' AND lat='ENG' \
+            AND ISPREF='Y' AND TS='P' GROUP BY lui ORDER BY lui"
+        res = self.db.execute_query(query, True)
+        try:
+            return res[0][0]
+        except IndexError:
+            return ""
+        
+    def get_sources_from_cui(self, cui: str) -> List[Tuple[str, None]]:
+        """Return all sources where the cui is listed
+
+        Args:
+            cui (str): The CUI of the concept
+        Returns:
+            List[Tuple[str, None]]: Sources
+        """
+        query = f"SELECT sab from MRCONSO WHERE cui='{cui}' AND LAT='ENG' GROUP BY sab"
+        res = self.db.execute_query(query, True)
+        try:
+            return res
+        except Exception as e:
+            print(str(e))
+            return [[]]

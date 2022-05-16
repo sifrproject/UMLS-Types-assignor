@@ -17,7 +17,7 @@ w2v_epochs: 20
 sequence_length: 20 # sequence_length
 
 # Numerical data
-numerical_data_shape: 1 # numerical_data_shape
+numerical_data_shape: 130 # numerical_data_shape / 129 (ENG SAB) + 1 (Has_Definition) -> These are only the size that we can determine before running pipeline
 
 # Neural network settings
 neural_network:
@@ -51,14 +51,14 @@ neural_network:
     steps:
       - name: "Input-Multi-Layer-Perceptron"
         type: "Input"
-        input_shape: 1 # numerical_data_shape
+        input_shape: 130 # numerical_data_shape
       - name: "Dense-1-MLP"
         type: "Dense"
-        units: 6
+        units: 60
         activation: "relu"
       - name: "Dense-2-MLP"
         type: "Dense"
-        units: 2
+        units: 10
         activation: "relu"
   concatenate:
     steps:

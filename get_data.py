@@ -49,7 +49,8 @@ def save_to_csv(X_data: list, Y_data: list, db_index: int):
         Y_data (list): Y data
         db_index (int): Index of the database
     """
-    data = pd.DataFrame(X_data, columns=['CUI', 'Corpus', 'Has_Definition'])
+    data = pd.DataFrame(X_data, columns=['CUI', 'Corpus', 'Has_Definition', 'Prefered_Label', \
+        'Labels', 'SAB'])
     data = pd.concat(
         [data, pd.DataFrame(Y_data, columns=['TUI', 'GUI'])], axis=1)
     # Save X and Y in the same csv file
@@ -99,6 +100,7 @@ def generate_source_data(limit: int, verbose=False):
             if verbose:
                 print("Getting labels...")
             try:
+                prefered_label = meta.get_prefered_label_from_cui(cui)
                 labels = " ".join(list(map(lambda x: x[0], meta.get_all_labels_from_cui(cui))))
             except Exception as e:
                 labels = ""
@@ -115,18 +117,37 @@ def generate_source_data(limit: int, verbose=False):
                 print(str(e))
             if verbose:
                 print("Done.")
+                
+            if verbose:
+                print("Getting sources...")
+            try:
+                sources = meta.get_sources_from_cui(cui)
+                sab = ""
+                for i in sources:
+                    if i[0]:
+                        sab += i[0]
+                    if i != sources[-1]:
+                        sab += "/"
+            except Exception as e:
+                sab = ""
+                print(str(e))
+            if verbose:
+                print("Done.")
 
             has_definition = True
             if definitions == "":
                 has_definition = False
 
-            # Corpus is the concatenation of all the labels and definitions
-            corpus = labels + " " + definitions
+            # Corpus is the concatenation of prefered_labels and definitions
+            corpus = definitions
 
             row = [
                 cui,
                 corpus,
                 1 if has_definition else 0,
+                prefered_label,
+                labels,
+                sab
             ]
             X_data.append(row)
             Y_data.append([tui, gui])
