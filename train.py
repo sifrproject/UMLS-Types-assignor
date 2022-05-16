@@ -47,6 +47,7 @@ def get_processed_data(config):
     if max_nb_data_per_class:
         data = data.groupby(column).apply(lambda x: x.sample(max_nb_data_per_class) \
             if len(x) > max_nb_data_per_class else x).reset_index(drop=True)
+        repartition_visualisation_graph(data, "artefact/training-repartitions.png")
     return data
 
 
