@@ -35,19 +35,27 @@ def get_processed_data(config):
         DataFrame: data
     """
     data = pd.read_csv('artefact/preprocessed_data.csv')
-    data["SAB"] = get_preprocessed_sab(data)
-    data["Labels_Count"] = get_preprocessed_labels_count(data)
-    data = data.drop(columns=["Labels"])
     column = config["y_classificaton_column"]
     excluded = config["drop_classificaton_columns"]
     if excluded and len(excluded) > 0:
+        if config["verbose"]:
+            print("Excluding columns:", excluded)
         # Drop rows in data[column] that have one of the values in excluded
         data = data[~data[column].isin(excluded)]
     max_nb_data_per_class = config["max_nb_data_per_class"]
     if max_nb_data_per_class:
+        if config["verbose"]:
+            print("Max nb data per class:", max_nb_data_per_class)
         data = data.groupby(column).apply(lambda x: x.sample(max_nb_data_per_class) \
             if len(x) > max_nb_data_per_class else x).reset_index(drop=True)
-        repartition_visualisation_graph(data, "artefact/training-repartitions.png")
+        repartition_visualisation_graph(data, "artefact/training-repartitions.png", config)
+    if config["verbose"]:
+        print("Get processed sources...")
+    data["SAB"] = get_preprocessed_sab(data)
+    if config["verbose"]:
+        print("Get processed labels count...")
+    data["Labels_Count"] = get_preprocessed_labels_count(data)
+    data = data.drop(columns=["Labels"])
     return data
 
 
@@ -71,9 +79,6 @@ def get_train_test_data(data, config):
     y_train = df_train[column].values
     y_test = df_test[column].values
 
-    X_train_atrbts = df_train.loc[:, ['Has_Definition']].values
-    X_test_atrbts = df_test.loc[:, ['Has_Definition']].values
-    
     arr = df_train[["Has_Definition", "SAB", "Labels_Count"]].to_numpy()
     
     rows = arr.shape[0]
@@ -87,6 +92,8 @@ def get_train_test_data(data, config):
         print(str(col_has_def) + " + " + str(col_sources) + " + " + \
             str(col_labels_count) + " = " + str(cols))
     
+    if config["verbose"]:
+        print("Creating train data attributes...")
     X_train_atrbts = None # ? Try to optimise this using only concatenate
     for row in arr:
         conc = np.concatenate((row[0], row[1], row[2]), axis=None)
@@ -99,6 +106,8 @@ def get_train_test_data(data, config):
     X_train_corpus = df_train["Clean_Corpus"].values
     X_test_corpus = df_test["Clean_Corpus"].values
 
+    if config["verbose"]:
+        print("Creating test data attributes...")
     arr = df_test[["Has_Definition", "SAB", "Labels_Count"]].to_numpy()
     
     X_test_atrbts = None # ? Try to optimise this using only concatenate
