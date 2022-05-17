@@ -172,8 +172,8 @@ def get_preprocessed_labels_count(data):
     wordset = pd.Series([y for x in data["Clean_Corpus"].str.split() for y in x]).unique()
     cvec = CountVectorizer(vocabulary=wordset, ngram_range=(1, 2))
     
-    labels_count_np = data["Labels"].apply(lambda x: cvec.fit_transform([x]).toarray()[0]).values
-    
+    labels = data["Labels"].values
+    labels_count_np = cvec.fit_transform(labels).toarray().tolist()
     return labels_count_np
 
 # Preprocessing BoW SAB - One-hot encoding of the sources
