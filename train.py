@@ -78,46 +78,33 @@ def get_train_test_data(data, config):
     column = config["y_classificaton_column"]
     y_train = df_train[column].values
     y_test = df_test[column].values
-
-    arr = df_train[["Has_Definition", "SAB", "Labels_Count"]].to_numpy()
     
-    rows = arr.shape[0]
-    col_has_def = 1
-    col_sources = arr[0][1].shape[0]
-    col_labels_count = arr[0][2].shape[0]
-    cols = col_has_def + col_sources + col_labels_count
+    X_train_has_def = np.stack(df_train["Has_Definition"].values)
+    X_test_has_def = np.stack(df_test["Has_Definition"].values)
+    
+    X_train_sab = np.stack(df_train["SAB"].values)
+    X_test_sab = np.stack(df_test["SAB"].values)
+    
+    X_train_labels_count = np.stack(df_train["Labels_Count"].values)
+    X_test_labels_count = np.stack(df_test["Labels_Count"].values)
+    
     if config["verbose"]:
         print("Attributes shape")
-        print("rows", rows)
-        print(str(col_has_def) + " + " + str(col_sources) + " + " + \
-            str(col_labels_count) + " = " + str(cols))
-    
-    if config["verbose"]:
-        print("Creating train data attributes...")
-    X_train_atrbts = None # ? Try to optimise this using only concatenate
-    for row in arr:
-        conc = np.concatenate((row[0], row[1], row[2]), axis=None)
+        shape_1 = 1
+        shape_2 = X_train_sab.shape[1]
+        shape_3 =X_train_labels_count.shape[1]
+        sum = shape_1 + shape_2 + shape_3
+        print(str(shape_1) + " + " + str(shape_2) + " + " + \
+            str(shape_3) + " = " + str(sum))
         
-        if X_train_atrbts is not None:
-            X_train_atrbts = np.vstack((X_train_atrbts, conc))
-        else:
-            X_train_atrbts = conc
+    X_train_atrbts = np.concatenate((X_train_sab, X_train_labels_count), axis=1)
+    X_train_atrbts = np.column_stack([X_train_atrbts, X_train_has_def])
+
+    X_test_atrbts = np.concatenate((X_test_sab, X_test_labels_count), axis=1)
+    X_test_atrbts = np.column_stack([X_test_atrbts, X_test_has_def])
     
     X_train_corpus = df_train["Clean_Corpus"].values
     X_test_corpus = df_test["Clean_Corpus"].values
-
-    if config["verbose"]:
-        print("Creating test data attributes...")
-    arr = df_test[["Has_Definition", "SAB", "Labels_Count"]].to_numpy()
-    
-    X_test_atrbts = None # ? Try to optimise this using only concatenate
-    for row in arr:
-        conc = np.concatenate((row[0], row[1], row[2]), axis=None)
-        
-        if X_test_atrbts is not None:
-            X_test_atrbts = np.vstack((X_test_atrbts, conc))
-        else:
-            X_test_atrbts = conc
             
     print("Splitting data done in %.2f seconds" % (time.time() - start))
     return X_train_atrbts, X_test_atrbts, X_train_corpus, X_test_corpus, y_train, y_test
