@@ -9,12 +9,14 @@ import pymysql.cursors
 dotenv_path = Path('.env')
 load_dotenv(dotenv_path=dotenv_path)
 
-HOST = os.getenv('HOST')
-USER = "root"
-PASSWORD = os.getenv('PASSWORD')
-DATABASE = os.getenv('DATABASE')
-UMLS_API_KEY = os.getenv('UMLS_API_KEY')
-
+try:
+    HOST = os.getenv('HOST')
+    USER = "root"
+    PASSWORD = os.getenv('PASSWORD')
+    DATABASE = os.getenv('DATABASE')
+    UMLS_API_KEY = os.getenv('UMLS_API_KEY')
+except Exception as e:
+    print("Env file not good")
 
 def is_query_modified_data(query: str) -> bool:
     """ Check if query is modifying data
@@ -44,15 +46,18 @@ class DatabaseConnection:
             database (str): database name
         """
         self.host = host
-        print("Host: " + self.host)
         self.user = user
-        print("User: " + self.user)
         self.password = password
-        print("Password: " + self.password)
         self.database = database
-        print("Database: " + self.database)
         self.connector = None
-        self.__connect()
+        try:
+            print("Host: " + self.host)
+            print("User: " + self.user)
+            print("Password: " + self.password)
+            print("Database: " + self.database)
+            self.__connect()
+        except Exception as e:
+            print("Error: unable to connect to database")
 
     # Method to connect to database
     def __connect(self):
