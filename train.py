@@ -431,7 +431,6 @@ def get_model(nlp, dic_vocabulary, max_class, config):
     model_mixed_data.compile(
         loss=loss, optimizer=optimize["name"], metrics=[metrics.binary_accuracy])
 
-    # You need to install graphviz (see instructions at https://graphviz.gitlab.io/download/)
     plot_model(model_mixed_data, to_file='artefact/model_plot.png',
                show_shapes=True, show_layer_names=True)
     return model_mixed_data
