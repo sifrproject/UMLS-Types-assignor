@@ -50,15 +50,27 @@ def get_processed_data(config):
                                           if len(x) > max_nb_data_per_class else x).reset_index(drop=True)
         repartition_visualisation_graph(
             data, "artefact/training-repartitions.png", config)
-    if config["verbose"]:
-        print("Get processed sources...")
-    data["SAB"] = get_preprocessed_sab(data)
-    if config["verbose"]:
-        print("Get processed labels count...")
-    data["Labels_Count"] = get_preprocessed_labels_count(data)
+    if "SAB" in config["attributes_features"]:
+        if config["verbose"]:
+            print("Get processed sources...")
+        data["SAB"] = get_preprocessed_sab(data)
+    if "Labels_Count" in config["attributes_features"]:
+        if config["verbose"]:
+            print("Get processed labels count...")
+        data["Labels_Count"] = get_preprocessed_labels_count(data)
     data = data.drop(columns=["Labels"])
     return data
 
+def get_nb_rows(list_of_features):
+    """Get the number of rows of a list of features
+
+    Args:
+        list_of_features (List[List[Any]]): list of features
+
+    Returns:
+        int: nb_rows
+    """
+    return list_of_features[0].shape[0]
 
 def get_train_test_data(data, config):
     """Get train and test data
@@ -79,31 +91,66 @@ def get_train_test_data(data, config):
     column = config["y_classificaton_column"]
     y_train = df_train[column].values
     y_test = df_test[column].values
+    
+    train_features = []
+    test_features = []
 
-    X_train_has_def = np.stack(df_train["Has_Definition"].values)
-    X_test_has_def = np.stack(df_test["Has_Definition"].values)
+    if "Has_Def" in config["attributes_features"]:
+        X_train_has_def = np.stack(df_train["Has_Definition"].values)
+        X_test_has_def = np.stack(df_test["Has_Definition"].values)
+        train_features.append(X_train_has_def)
+        test_features.append(X_test_has_def)
 
-    X_train_sab = np.stack(df_train["SAB"].values)
-    X_test_sab = np.stack(df_test["SAB"].values)
+    if "SAB" in config["attributes_features"]:
+        X_train_sab = np.stack(df_train["SAB"].values)
+        X_test_sab = np.stack(df_test["SAB"].values)
+        train_features.append(X_train_sab)
+        test_features.append(X_test_sab)
 
-    X_train_labels_count = np.stack(df_train["Labels_Count"].values)
-    X_test_labels_count = np.stack(df_test["Labels_Count"].values)
+    if "Labels_Count" in config["attributes_features"]:
+        X_train_labels_count = np.stack(df_train["Labels_Count"].values)
+        X_test_labels_count = np.stack(df_test["Labels_Count"].values)
+        train_features.append(X_train_labels_count)
+        test_features.append(X_test_labels_count)
+        
+    if len(train_features) == 0:
+        if config["verbose"]:
+            print("No features to train on")
+        X_train_has_def = np.stack(df_train["Has_Definition"].values)
+        X_test_has_def = np.stack(df_test["Has_Definition"].values)
+        train_features.append(X_train_has_def)
+        test_features.append(X_test_has_def)
+        print("Using default features: Has_Def")
+    elif config["verbose"]:
+        print("Using features:", config["attributes_features"])
 
     if config["verbose"]:
         print("Attributes shape")
-        shape_1 = 1
-        shape_2 = X_train_sab.shape[1]
-        shape_3 = X_train_labels_count.shape[1]
-        sum = shape_1 + shape_2 + shape_3
-        print(str(shape_1) + " + " + str(shape_2) + " + " +
-              str(shape_3) + " = " + str(sum))
+        sum = 0
+        for count, i in enumerate(train_features):
+            try:
+                if len(i.shape) > 1:
+                    cols = i.shape[1]
+                else:
+                    cols = 1
+            except:
+                cols = 0
+            sum += cols
+            print(cols, end=" ")
+            if count != len(train_features) - 1:
+                print("+", end=" ")
+        print("= ", sum)
 
-    X_train_atrbts = np.concatenate(
-        (X_train_sab, X_train_labels_count), axis=1)
-    X_train_atrbts = np.column_stack([X_train_atrbts, X_train_has_def])
-
-    X_test_atrbts = np.concatenate((X_test_sab, X_test_labels_count), axis=1)
-    X_test_atrbts = np.column_stack([X_test_atrbts, X_test_has_def])
+    X_train_atrbts = [[]] * get_nb_rows(train_features)
+    X_test_atrbts = [[]] * get_nb_rows(test_features)
+    
+    for i in train_features:
+        if i is not None:
+            X_train_atrbts = np.column_stack([X_train_atrbts, i])
+            
+    for i in test_features:
+        if i is not None:
+            X_test_atrbts = np.column_stack([X_test_atrbts, i])
 
     X_train_corpus = df_train["Clean_Corpus"].values
     X_test_corpus = df_test["Clean_Corpus"].values
@@ -587,7 +634,8 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
 
     # log artifacts
     mlflow.log_artifact("artefact/model_plot.png")
-    mlflow.log_artifact("artefact/training.png")
+    mlflow.log_artifact("artefact/history_accuracy.png")
+    mlflow.log_artifact("artefact/history_loss.png")
     mlflow.log_artifact("artefact/results.png")
 
     # log model
