@@ -46,9 +46,10 @@ def get_processed_data(config):
     if max_nb_data_per_class:
         if config["verbose"]:
             print("Max nb data per class:", max_nb_data_per_class)
-        data = data.groupby(column).apply(lambda x: x.sample(max_nb_data_per_class) \
-            if len(x) > max_nb_data_per_class else x).reset_index(drop=True)
-        repartition_visualisation_graph(data, "artefact/training-repartitions.png", config)
+        data = data.groupby(column).apply(lambda x: x.sample(max_nb_data_per_class)
+                                          if len(x) > max_nb_data_per_class else x).reset_index(drop=True)
+        repartition_visualisation_graph(
+            data, "artefact/training-repartitions.png", config)
     if config["verbose"]:
         print("Get processed sources...")
     data["SAB"] = get_preprocessed_sab(data)
@@ -78,34 +79,35 @@ def get_train_test_data(data, config):
     column = config["y_classificaton_column"]
     y_train = df_train[column].values
     y_test = df_test[column].values
-    
+
     X_train_has_def = np.stack(df_train["Has_Definition"].values)
     X_test_has_def = np.stack(df_test["Has_Definition"].values)
-    
+
     X_train_sab = np.stack(df_train["SAB"].values)
     X_test_sab = np.stack(df_test["SAB"].values)
-    
+
     X_train_labels_count = np.stack(df_train["Labels_Count"].values)
     X_test_labels_count = np.stack(df_test["Labels_Count"].values)
-    
+
     if config["verbose"]:
         print("Attributes shape")
         shape_1 = 1
         shape_2 = X_train_sab.shape[1]
-        shape_3 =X_train_labels_count.shape[1]
+        shape_3 = X_train_labels_count.shape[1]
         sum = shape_1 + shape_2 + shape_3
-        print(str(shape_1) + " + " + str(shape_2) + " + " + \
-            str(shape_3) + " = " + str(sum))
-        
-    X_train_atrbts = np.concatenate((X_train_sab, X_train_labels_count), axis=1)
+        print(str(shape_1) + " + " + str(shape_2) + " + " +
+              str(shape_3) + " = " + str(sum))
+
+    X_train_atrbts = np.concatenate(
+        (X_train_sab, X_train_labels_count), axis=1)
     X_train_atrbts = np.column_stack([X_train_atrbts, X_train_has_def])
 
     X_test_atrbts = np.concatenate((X_test_sab, X_test_labels_count), axis=1)
     X_test_atrbts = np.column_stack([X_test_atrbts, X_test_has_def])
-    
+
     X_train_corpus = df_train["Clean_Corpus"].values
     X_test_corpus = df_test["Clean_Corpus"].values
-            
+
     print("Splitting data done in %.2f seconds" % (time.time() - start))
     return X_train_atrbts, X_test_atrbts, X_train_corpus, X_test_corpus, y_train, y_test
 
@@ -429,7 +431,7 @@ def get_model(nlp, dic_vocabulary, max_class, config):
     model_mixed_data = models.Model(
         inputs=[word_embedding.input, mlp.input], outputs=y_out)
     model_mixed_data.compile(
-        loss=loss, optimizer=optimize["name"], metrics=[metrics.binary_accuracy])
+        loss=loss, optimizer=optimize["name"], metrics=[metrics.binary_accuracy, "accuracy"])
 
     plot_model(model_mixed_data, to_file='artefact/model_plot.png',
                show_shapes=True, show_layer_names=True)
@@ -473,29 +475,24 @@ def plot_results(training):
     Args:
         training (any): Training history
     """
-    # Plot loss and accuracy
-    metrics = [k for k in training.history.keys() if (
-        "loss" not in k) and ("val" not in k)]
-    fig, ax = plt.subplots(nrows=1, ncols=2, sharey=True)
-    ax[0].set(title="Training")
-    ax11 = ax[0].twinx()
-    ax[0].plot(training.history['loss'], color='black')
-    ax[0].set_xlabel('Epochs')
-    ax[0].set_ylabel('Loss', color='black')
-    for metric in metrics:
-        ax11.plot(training.history[metric], label=metric)
-    ax11.set_ylabel("Score", color='steelblue')
-    ax11.legend()
-    ax[1].set(title="Validation")
-    ax22 = ax[1].twinx()
-    ax[1].plot(training.history['val_loss'], color='black')
-    ax[1].set_xlabel('Epochs')
-    ax[1].set_ylabel('Loss', color='black')
-    for metric in metrics:
-        ax22.plot(training.history['val_'+metric], label=metric)
-    ax22.set_ylabel("Score", color="steelblue")
-    fig.savefig('artefact/training.png')
-    plt.close(fig)
+    # Summarize history for accuracy
+    plt.plot(training.history['accuracy'])
+    plt.plot(training.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig('artefact/history_accuracy.png')
+    plt.close()
+    # Summarize history for loss
+    plt.plot(training.history['loss'])
+    plt.plot(training.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig('artefact/history_loss.png')
+    plt.close()
 
 
 def train_model(X_train_attributes, X_train_word_embedding, y_train, max_class, nlp,
@@ -638,16 +635,17 @@ def train_and_test(config):
         print("Loading word2vec model...")
     X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary = word2vec(
         X_train_corpus, X_test_corpus, config)
-    
+
     nb_attributes = X_train_attributes.shape[1]
     config["numerical_data_shape"] = nb_attributes
-    
+
     # Set up panda dataframe with word embedding and attributes and y
     column = config["y_classificaton_column"]
     datafram = pd.DataFrame()
     datafram[column] = y_train
-    repartition_visualisation_graph(datafram, "artefact/smote.png", config)
-    
+    repartition_visualisation_graph(datafram, "artefact/repartition_visualisation_graph.png",
+                                    config)
+
     # Train the model
     if config["verbose"]:
         print("Training model...")
