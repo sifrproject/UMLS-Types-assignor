@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 
 # Preprocessing
@@ -168,12 +169,10 @@ def get_preprocessed_labels_count(data):
     Returns:
         pd.DataFrame: dataframe with the preprocessed labels
     """
-    # List of each words in data["Clean_corpus"]
-    wordset = pd.Series([y for x in data["Clean_Corpus"].str.split() for y in x]).unique()
-    cvec = CountVectorizer(vocabulary=wordset, ngram_range=(1, 2))
-    
     labels = data["Labels"].values
-    labels_count_np = cvec.fit_transform(labels).toarray().tolist()
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2))
+    labels_count_np = vectorizer.fit_transform(labels)
+    labels_count_np = labels_count_np.toarray().tolist()
     return labels_count_np
 
 # Preprocessing BoW SAB - One-hot encoding of the sources
