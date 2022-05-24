@@ -22,7 +22,8 @@ from keras.utils.vis_utils import plot_model  # Plot
 import mlflow
 import mlflow.keras
 
-from process_data import get_preprocessed_labels_count, get_preprocessed_sab, repartition_visualisation_graph
+from process_data import get_preprocessed_labels_count, get_preprocessed_parents_types, get_preprocessed_sab, repartition_visualisation_graph
+from umls_api.column_type import ColumnType
 
 
 def get_processed_data(config):
@@ -50,16 +51,13 @@ def get_processed_data(config):
                                           if len(x) > max_nb_data_per_class else x).reset_index(drop=True)
         repartition_visualisation_graph(
             data, "artefact/training-repartitions.png", config)
-    if "SAB" in config["attributes_features"]:
-        if config["verbose"]:
-            print("Get processed sources...")
-        data["SAB"] = get_preprocessed_sab(data)
     if "Labels_Count" in config["attributes_features"]:
         if config["verbose"]:
             print("Get processed labels count...")
         data["Labels_Count"] = get_preprocessed_labels_count(data)
     data = data.drop(columns=["Labels"])
     return data
+
 
 def get_nb_rows(list_of_features):
     """Get the number of rows of a list of features
@@ -71,6 +69,7 @@ def get_nb_rows(list_of_features):
         int: nb_rows
     """
     return list_of_features[0].shape[0]
+
 
 def get_train_test_data(data, config):
     """Get train and test data
@@ -91,28 +90,44 @@ def get_train_test_data(data, config):
     column = config["y_classificaton_column"]
     y_train = df_train[column].values
     y_test = df_test[column].values
-    
+
     train_features = []
     test_features = []
 
     if "Has_Def" in config["attributes_features"]:
+        if config["verbose"]:
+            print("Get processed Has_Definition...")
         X_train_has_def = np.stack(df_train["Has_Definition"].values)
         X_test_has_def = np.stack(df_test["Has_Definition"].values)
         train_features.append(X_train_has_def)
         test_features.append(X_test_has_def)
 
     if "SAB" in config["attributes_features"]:
-        X_train_sab = np.stack(df_train["SAB"].values)
-        X_test_sab = np.stack(df_test["SAB"].values)
+        if config["verbose"]:
+            print("Get processed SAB...")
+        train_sab = get_preprocessed_sab(df_train)
+        X_train_sab = np.stack(train_sab)
+        test_sab = get_preprocessed_sab(df_test)
+        X_test_sab = np.stack(test_sab)
         train_features.append(X_train_sab)
         test_features.append(X_test_sab)
 
     if "Labels_Count" in config["attributes_features"]:
+        if config["verbose"]:
+            print("Get processed Labels_Count...")
         X_train_labels_count = np.stack(df_train["Labels_Count"].values)
         X_test_labels_count = np.stack(df_test["Labels_Count"].values)
         train_features.append(X_train_labels_count)
         test_features.append(X_test_labels_count)
-        
+
+    if "Parents_Types" in config["attributes_features"]:
+        type = ColumnType.TUI if config["y_classificaton_column"] == "TUI" \
+            else ColumnType.GUI
+        X_train_parents_type = get_preprocessed_parents_types(df_train, type)
+        X_test_parents_type = get_preprocessed_parents_types(df_test, type)
+        train_features.append(X_train_parents_type)
+        test_features.append(X_test_parents_type)
+
     if len(train_features) == 0:
         if config["verbose"]:
             print("No features to train on")
@@ -143,11 +158,11 @@ def get_train_test_data(data, config):
 
     X_train_atrbts = [[]] * get_nb_rows(train_features)
     X_test_atrbts = [[]] * get_nb_rows(test_features)
-    
+
     for i in train_features:
         if i is not None:
             X_train_atrbts = np.column_stack([X_train_atrbts, i])
-            
+
     for i in test_features:
         if i is not None:
             X_test_atrbts = np.column_stack([X_test_atrbts, i])

@@ -3,6 +3,7 @@
 import os
 import sys
 import timeit
+from umls_api.column_type import ColumnType
 from numpy import NaN
 import pandas as pd
 from umls_api.mysql_connection import db, UMLS_API_KEY
@@ -49,8 +50,8 @@ def save_to_csv(X_data: list, Y_data: list, db_index: int):
         Y_data (list): Y data
         db_index (int): Index of the database
     """
-    data = pd.DataFrame(X_data, columns=['CUI', 'Corpus', 'Has_Definition', 'Prefered_Label', \
-        'Labels', 'SAB'])
+    data = pd.DataFrame(X_data, columns=['CUI', 'Corpus', 'Has_Definition', 'Prefered_Label',
+                                         'Labels', 'SAB', 'Parents_Types'])
     data = pd.concat(
         [data, pd.DataFrame(Y_data, columns=['TUI', 'GUI'])], axis=1)
     # Save X and Y in the same csv file
@@ -60,7 +61,7 @@ def save_to_csv(X_data: list, Y_data: list, db_index: int):
         data.to_csv('artefact/data.csv', index=False)
 
 
-def generate_source_data(limit: int, verbose=False):
+def generate_source_data(limit: int, config: dict, verbose=False):
     """generate_source_data function"""
     db_index = None
     db_index_path = "artefact/db_index"
@@ -101,7 +102,8 @@ def generate_source_data(limit: int, verbose=False):
                 print("Getting labels...")
             try:
                 prefered_label = meta.get_prefered_label_from_cui(cui)
-                labels = " ".join(list(map(lambda x: x[0], meta.get_all_labels_from_cui(cui))))
+                labels = " ".join(
+                    list(map(lambda x: x[0], meta.get_all_labels_from_cui(cui))))
             except Exception as e:
                 labels = ""
                 print(str(e))
@@ -111,13 +113,21 @@ def generate_source_data(limit: int, verbose=False):
             if verbose:
                 print("Getting definition...")
             try:
-                definitions = " ".join(list(map(lambda x: x[0], meta.get_all_definitions_from_cui(cui))))
+                definitions = " ".join(
+                    list(map(lambda x: x[0], meta.get_all_definitions_from_cui(cui))))
+                has_definition = True
+                if definitions == "":
+                    has_definition = False
+
+                # Corpus is the concatenation of prefered_labels and definitions
+                corpus = definitions
             except Exception as e:
                 definitions = ""
+                has_definition = False
                 print(str(e))
             if verbose:
                 print("Done.")
-                
+
             if verbose:
                 print("Getting sources...")
             try:
@@ -134,12 +144,19 @@ def generate_source_data(limit: int, verbose=False):
             if verbose:
                 print("Done.")
 
-            has_definition = True
-            if definitions == "":
-                has_definition = False
-
-            # Corpus is the concatenation of prefered_labels and definitions
-            corpus = definitions
+            if verbose:
+                print("Getting parents informations...")
+            try:
+                type = ColumnType.TUI if config["y_classificaton_column"] == "TUI" \
+                    else ColumnType.GUI
+                parents_types = meta.get_all_type_of_parent_from_cui(
+                    cui, type, gui_indexes)
+                parents_types = " ".join(parents_types)
+            except Exception as e:
+                parents_types = ""
+                print(str(e))
+            if verbose:
+                print("Done.")
 
             row = [
                 cui,
@@ -147,7 +164,8 @@ def generate_source_data(limit: int, verbose=False):
                 1 if has_definition else 0,
                 prefered_label,
                 labels,
-                sab
+                sab,
+                parents_types
             ]
             X_data.append(row)
             Y_data.append([tui, gui])

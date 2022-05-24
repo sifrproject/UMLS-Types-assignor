@@ -4,10 +4,12 @@ import urllib3
 from umls_api.authentication_umls_api import Authentication
 from umls_api.mysql_connection import DatabaseConnection
 from umls_api.languages import Languages
+from umls_api.column_type import ColumnType
 
 f = open('umls_api/sources.json', 'r')
 sources = json.load(f)
 f.close()
+
 
 def sort_tuple(tup: List[Tuple[str, str, str, str, str]]):
     """Sorts a list of tuples alphabetically
@@ -50,15 +52,17 @@ def remove_duplicated(tup: List[Tuple[str, str, str, str, str]]):
 
 def get_tuple_of_languages_sources(language=Languages.ENG) -> Tuple[str]:
     """Gets the tuple of languages and sources
-    
+
     Args:
-        language (Languages, optional): The language to get the tuple of languages and sources. Defaults to Languages.ENG.
-        
+        language (Languages, optional): The language to get the tuple of languages and sources. 
+        Defaults to Languages.ENG.
+
     Returns:
         Tuple[str]: The tuple of sources abbreviation of the language
     """
     global sources
-    return tuple([source['abbreviation'] for source in sources if source['language'] == language.value])
+    return tuple([source['abbreviation'] for source in sources
+                  if source['language'] == language.value])
 
 
 class MetathesaurusQueries:
@@ -275,13 +279,13 @@ class MetathesaurusQueries:
             GROUP by lui  ORDER BY lui"
         res = self.db.execute_query(query, True)
         return res
-    
+
     def get_prefered_label_from_cui(self, cui: str):
         """Returns the prefered label of a concept given its CUI
 
         Args:
             cui (str): The CUI of the concept
-            
+
         Returns:
             str: The prefered label
         """
@@ -292,7 +296,7 @@ class MetathesaurusQueries:
             return res[0][0]
         except IndexError:
             return ""
-        
+
     def get_sources_from_cui(self, cui: str) -> List[Tuple[str, None]]:
         """Return all sources where the cui is listed
 
@@ -308,3 +312,34 @@ class MetathesaurusQueries:
         except Exception as e:
             print(str(e))
             return [[]]
+
+    def get_all_type_of_parent_from_cui(self, cui: str, type: ColumnType,
+                                        gui_indexes: dict) -> List[str]:
+        """Returns all parents type of a concept given its CUI
+
+        Args:
+            cui (str): The CUI of the concept
+
+        Returns:
+            list: A list of all TUI [(TUI)]
+        """
+        list_eng_sources = get_tuple_of_languages_sources(Languages.ENG)
+        try:
+            query = f"SELECT CUI1 FROM MRREL WHERE CUI2='{cui}' AND SAB IN {list_eng_sources} \
+                AND REL='CHD' GROUP BY CUI1"
+            cui_parents = self.db.execute_query(query, True)
+            if cui_parents is None or len(cui_parents) == 0:
+                return []
+            for i in range(len(cui_parents)):
+                cui_parents[i] = "'" + cui_parents[i][0] + "'"
+            query = f"SELECT TUI FROM MRSTY WHERE CUI IN ({', '.join(cui_parents)})"
+            res = self.db.execute_query(query, True)
+            for i in range(len(res)):
+                res[i] = res[i][0]
+            if type == ColumnType.GUI:
+                for i in range(len(res)):
+                    res[i] = gui_indexes[res[i]]
+            return res
+        except Exception as e:
+            print(str(e))
+            return []

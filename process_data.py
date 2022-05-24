@@ -10,12 +10,14 @@ import mlflow
 import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-from sklearn.feature_extraction.text import CountVectorizer
+from umls_api.mysql_connection import db
+from umls_api.semantic_network_queries import SemanticNetworkQueries
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 
 # Preprocessing
 import nltk
+from umls_api.column_type import ColumnType
 
 from umls_api.metathesaurus_queries import get_tuple_of_languages_sources
 nltk.download('stopwords', quiet=True)
@@ -155,11 +157,12 @@ def utils_preprocessing_corpus(text, stopwords=None, stemming=False, lemmitizati
     text = " ".join(text)
     return text
 
+
 def one_hot_encoding_sabs(sabset, l_sab):
     sabs = l_sab.split("/")
     return np.array([1 if x in sabs else 0 for x in sabset])
 
-# Preprocessing BoW Labels- One-hot encoding of the labels
+
 def get_preprocessed_labels_count(data):
     """This function get the preprocessed labels.
 
@@ -175,7 +178,7 @@ def get_preprocessed_labels_count(data):
     labels_count_np = labels_count_np.toarray().tolist()
     return labels_count_np
 
-# Preprocessing BoW SAB - One-hot encoding of the sources
+
 def get_preprocessed_sab(data):
     """This function preprocess the SAB column.
 
@@ -188,8 +191,35 @@ def get_preprocessed_sab(data):
     all_sources = get_tuple_of_languages_sources()
     sabset = [x for x in all_sources]
     # Create a one-hot encoding of the SAB column from sabset
-    values = data["SAB"].apply(lambda x: one_hot_encoding_sabs(sabset, x)).values
+    values = data["SAB"].apply(
+        lambda x: one_hot_encoding_sabs(sabset, x)).values
     return values
+
+
+def get_preprocessed_parents_types(data: any, col_type: ColumnType):
+    """This function preprocess the Parents Types column.
+
+    Args:
+        data (pd.Dataframe): dataframe with the preprocessed data
+
+    Returns:
+        pd.Dataframe: dataframe with the preprocessed data
+    """
+    # Remove NaN values and replace empty string
+    data['Parents_Types'] = data['Parents_Types'].fillna("")
+
+    parents_types = data["Parents_Types"].values
+    sty = SemanticNetworkQueries(db)
+    if col_type == ColumnType.GUI:
+        all_gui = sty.get_all_single_gui()
+        type_voc = [i[0] for i in all_gui]
+    else:
+        all_tui = sty.get_all_tui()
+        type_voc = [i[0] for i in all_tui]
+    vectorizer = TfidfVectorizer(vocabulary=type_voc, lowercase=False)
+    type_frequency = vectorizer.fit_transform(parents_types).toarray()
+    return type_frequency
+
 
 def preprocess(config):
     """This function preprocess the data.
@@ -222,7 +252,7 @@ def preprocess(config):
     data["Clean_Corpus"] = data["Prefered_Label"] + " " + data["Clean_Corpus"]
 
     ######################################################################################
-    
+
     end = time.time()
     print(f"Preprocessing done in {end - start} seconds")
     # Drop "Corpus" column

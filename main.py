@@ -105,7 +105,7 @@ def main():
                 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
             if only_source or all:
                 print("Generating source data...")
-                generate_source_data(limit, config["verbose"])
+                generate_source_data(limit, config, config["verbose"])
             if from_preprocess or only_preprocess or all:
                 print("Preprocessing source data...")
                 preprocess(config)

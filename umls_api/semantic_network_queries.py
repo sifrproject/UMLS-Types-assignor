@@ -224,3 +224,12 @@ class SemanticNetworkQueries:
         """
         query = "SELECT SGA, TUI FROM SRGRP ORDER BY TUI"
         return self.db.execute_query(query, all_rows)
+
+    def get_all_single_gui(self, all_rows=True) -> List[Any]:
+        """Get all TUI
+
+        Returns:
+            List[Any]: All TUI
+        """
+        query = "SELECT SGA FROM SRGRP GROUP BY SGA"
+        return self.db.execute_query(query, all_rows)
