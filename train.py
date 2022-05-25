@@ -619,9 +619,15 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
     print("Detail:")
     clf_report = sk_metrics.classification_report(
         y_test, predicted, output_dict=True)
-    res_plot = sns.heatmap(pd.DataFrame(clf_report).iloc[:-1, :].T, annot=True)
+    plt.clf()
+    if config["y_classificaton_column"] == "TUI":
+        fig = plt.subplots(figsize=(25, 25))
+        res_plot = sns.heatmap(pd.DataFrame(clf_report).iloc[:-1, :].T, annot=True, linewidths=.2)
+    else:
+        res_plot = sns.heatmap(pd.DataFrame(clf_report).iloc[:-1, :].T, annot=True)
     fig = res_plot.get_figure()
     fig.savefig("artefact/results.png")
+    plt.clf()
 
     # Log all the MLflow config
     mlflow.log_param("nn_epoch", config["neural_network"]["epochs"])
