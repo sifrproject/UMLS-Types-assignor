@@ -10,8 +10,6 @@ import mlflow
 import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-from umls_api.mysql_connection import db
-from umls_api.semantic_network_queries import SemanticNetworkQueries
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 
@@ -209,13 +207,14 @@ def get_preprocessed_parents_types(data: any, col_type: ColumnType):
     data['Parents_Types'] = data['Parents_Types'].fillna("")
 
     parents_types = data["Parents_Types"].values
-    sty = SemanticNetworkQueries(db)
     if col_type == ColumnType.GUI:
-        all_gui = sty.get_all_single_gui()
-        type_voc = [i[0] for i in all_gui]
+        f = open("artefact/type_gui.txt", "r")
+        content = f.read()
+        type_voc = content.split()
     else:
-        all_tui = sty.get_all_tui()
-        type_voc = [i[0] for i in all_tui]
+        f = open("artefact/type_tui.txt", "r")
+        content = f.read()
+        type_voc = content.split()
     vectorizer = TfidfVectorizer(vocabulary=type_voc, lowercase=False)
     type_frequency = vectorizer.fit_transform(parents_types).toarray()
     return type_frequency

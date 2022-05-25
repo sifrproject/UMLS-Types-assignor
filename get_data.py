@@ -61,6 +61,21 @@ def save_to_csv(X_data: list, Y_data: list, db_index: int):
         data.to_csv('artefact/data.csv', index=False)
 
 
+def save_types():
+    """Save all the possible types in two files"""
+    sty = SemanticNetworkQueries(db)
+    all_gui = sty.get_all_single_gui()
+    type_res = [i[0] for i in all_gui]
+    f = open("artefact/type_gui.txt", "w+")
+    f.write(" ".join(type_res))
+    f.close()
+    all_tui = sty.get_all_tui()
+    type_res = [i[0] for i in all_tui]
+    f = open("artefact/type_tui.txt", "w+")
+    f.write(" ".join(type_res))
+    f.close()
+
+
 def generate_source_data(limit: int, config: dict, verbose=False):
     """generate_source_data function"""
     db_index = None
@@ -182,6 +197,8 @@ def generate_source_data(limit: int, config: dict, verbose=False):
     save_to_csv(X_data, Y_data, db_index)
     if limit:
         save_index_db(db_index + count)
+
+    save_types()
 
     stop = timeit.default_timer()
 
