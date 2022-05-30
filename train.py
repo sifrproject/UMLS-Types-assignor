@@ -667,7 +667,7 @@ def train_and_test(config):
     column = config["y_classificaton_column"]
     datafram = pd.DataFrame()
     datafram[column] = y_train
-    repartition_visualisation_graph(datafram, "artefact/repartition_visualisation_graph.png",
+    repartition_visualisation_graph(datafram, "artefact/testing-repartition.png",
                                     config)
 
     # Train the model
