@@ -500,36 +500,6 @@ def get_model(nlp, dic_vocabulary, max_class, config):
     return model_mixed_data
 
 
-def get_binary_loss(hist):
-    """Get binary loss"""
-    loss = hist.history['loss']
-    loss_val = loss[len(loss) - 1]
-    return loss_val
-
-
-def get_binary_acc(hist):
-    """Get binary acc"""
-    acc = hist.history['binary_accuracy']
-    acc_value = acc[len(acc) - 1]
-
-    return acc_value
-
-
-def get_validation_loss(hist):
-    """Get validation loss"""
-    val_loss = hist.history['val_loss']
-    val_loss_value = val_loss[len(val_loss) - 1]
-
-    return val_loss_value
-
-
-def get_validation_acc(hist):
-    """Get validation acc"""
-    val_acc = hist.history['val_binary_accuracy']
-    val_acc_value = val_acc[len(val_acc) - 1]
-
-    return val_acc_value
-
 
 def plot_results(training):
     """Plot results (loss and acc) and save it to artefact/training.png
@@ -629,29 +599,14 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
     fig.savefig("artefact/results.png")
     plt.clf()
 
-    # Log all the MLflow config
-    mlflow.log_param("nn_epoch", config["neural_network"]["epochs"])
-    mlflow.log_param("nn_loss", config["neural_network"]["loss"])
-    mlflow.log_param("nn_optimizer_name",
-                     config["neural_network"]["optimizer"]["name"])
-    mlflow.log_param("nn_metrics", metrics.categorical_accuracy)
-    mlflow.log_param("w2c_vector_size", config["vector_size"])
-    mlflow.log_param("w2c_window", config["window"])
-    mlflow.log_param("w2c_epoch", config["w2v_epochs"])
-    mlflow.log_param("w2c_sequence_length", config["sequence_length"])
-
-    # Calculate metrics
-    binary_loss = get_binary_loss(history)
-    binary_acc = get_binary_acc(history)
-    validation_loss = get_validation_loss(history)
-    validation_acc = get_validation_acc(history)
-
-    # Log all the MLflow Metrics
-    mlflow.log_metric("binary_loss", binary_loss)
-    mlflow.log_metric("binary_acc", binary_acc)
-    mlflow.log_metric("validation_loss", validation_loss)
-    mlflow.log_metric("validation_acc", validation_acc)
-    mlflow.log_metric("average_acc", accuracy)
+    # Log metrics
+    mlflow.log_metric("accuracy", accuracy)
+    mlflow.log_metric("max_data", config["max_nb_data_per_class"])
+    
+    # Log params
+    mlflow.log_param("class", config["y_classificaton_column"])
+    mlflow.log_param("features", " ".join(config["attributes_features"]))
+    mlflow.log_param("excluded", " ".join(config["drop_classificaton_columns"]))
 
     # log artifacts
     mlflow.log_artifact("artefact/model_plot.png")
