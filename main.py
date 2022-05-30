@@ -63,9 +63,10 @@ def main():
                         help='Limit of the source data number generated.')
     parser.add_argument('--debug_output_path', type=str,
                         help='Path of the output log.')
+    parser.add_argument('--run_name', type=str, help='REQUIRED: Name of the run.', required=True)
 
     args = parser.parse_args()
-
+    
     if args.verbose:
         config["verbose"] = True
     else:
@@ -92,7 +93,7 @@ def main():
         except EOFError:
             pass
 
-    with mlflow.start_run(run_name="test_mlflow"):
+    with mlflow.start_run(run_name=args.run_name):
 
         # Print out current run_uuid
         run_uuid = mlflow.active_run().info.run_uuid
