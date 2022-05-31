@@ -22,7 +22,7 @@ from keras.utils.vis_utils import plot_model  # Plot
 import mlflow
 import mlflow.keras
 
-from process_data import get_preprocessed_labels_count, get_preprocessed_parents_types, get_preprocessed_sab, repartition_visualisation_graph
+from process_data import get_preprocessed_parents_types, get_preprocessed_sab, repartition_visualisation_graph
 from umls_api.column_type import ColumnType
 
 
@@ -51,11 +51,6 @@ def get_processed_data(config):
                                           if len(x) > max_nb_data_per_class else x).reset_index(drop=True)
         repartition_visualisation_graph(
             data, "artefact/training-repartitions.png", config)
-    if "Labels_Count" in config["attributes_features"]:
-        if config["verbose"]:
-            print("Get processed labels count...")
-        data["Labels_Count"] = get_preprocessed_labels_count(data)
-    data = data.drop(columns=["Labels"])
     return data
 
 
@@ -79,7 +74,8 @@ def get_train_test_data(data, config):
         config (dict): config
 
     Returns:
-        X_train_attributes, X_test_attributes, X_train_corpus, X_test_corpus, y_train, y_test
+        X_train_attributes, X_test_attributes, X_train_corpus, X_test_corpus, 
+        X_train_labels, X_test_labels, y_train, y_test
 
     """
     print("Splitting data...")
@@ -111,14 +107,6 @@ def get_train_test_data(data, config):
         X_test_sab = np.stack(test_sab)
         train_features.append(X_train_sab)
         test_features.append(X_test_sab)
-
-    if "Labels_Count" in config["attributes_features"]:
-        if config["verbose"]:
-            print("Get processed Labels_Count...")
-        X_train_labels_count = np.stack(df_train["Labels_Count"].values)
-        X_test_labels_count = np.stack(df_test["Labels_Count"].values)
-        train_features.append(X_train_labels_count)
-        test_features.append(X_test_labels_count)
 
     if "Parents_Types" in config["attributes_features"]:
         type = ColumnType.TUI if config["y_classificaton_column"] == "TUI" \
@@ -170,8 +158,12 @@ def get_train_test_data(data, config):
     X_train_corpus = df_train["Clean_Corpus"].values
     X_test_corpus = df_test["Clean_Corpus"].values
 
+    X_train_labels = df_train["Labels"].values
+    X_test_labels = df_test["Labels"].values
+
     print("Splitting data done in %.2f seconds" % (time.time() - start))
-    return X_train_atrbts, X_test_atrbts, X_train_corpus, X_test_corpus, y_train, y_test
+    return X_train_atrbts, X_test_atrbts, X_train_corpus, X_test_corpus, \
+        X_train_labels, X_test_labels, y_train, y_test
 
 ######################################################################################
 # Word Embedding
@@ -324,6 +316,30 @@ def word2vec(training_corpus, testing_corpus, config):
         testing_corpus, bigrams_detector, trigrams_detector, tokenizer, config)
     return X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary
 
+
+def bag_of_words_gen(X_train_labels, X_test_labels, config):
+    """Train and apply bag of words model
+
+    Args:
+        X_train_labels (List[str]): Labels of training corpus
+        X_test_labels (List[str]): Labels of testing corpus
+
+    Returns:
+       X_train_bow, X_test_bow, tokenizer
+    """
+    print("Training bag of words model...")
+    tokenizer = kprocessing.text.Tokenizer(lower=True, split=' ', oov_token="NaN",
+                                           filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n')
+    tokenizer.fit_on_texts(X_train_labels)
+
+    train_sequences = tokenizer.texts_to_sequences(X_train_labels)
+    X_train_bow = tokenizer.sequences_to_matrix(train_sequences, mode='tfidf')
+
+    test_sequences = tokenizer.texts_to_sequences(X_test_labels)
+    X_test_bow = tokenizer.sequences_to_matrix(test_sequences, mode='tfidf')
+
+    return X_train_bow, X_test_bow, tokenizer
+
 ######################################################################################
 
 
@@ -372,8 +388,6 @@ def get_input_layer_and_next_steps(type_model, config):
     steps = config["neural_network"][type_model]["steps"].copy()
     # Search for the first step with the type "Input"
     first_step = next(step for step in steps if step["type"] == "Input")
-    if type_model == "multi_layer_perception":
-        first_step["input_shape"] = config["numerical_data_shape"]
     inputs = layers.Input(
         shape=first_step["input_shape"], name=first_step["name"])
     # Remove first step from the list
@@ -410,7 +424,10 @@ def create_model(type_model, config, embeddings=None, inputs=None):
         elif i["type"] == "Dense":
             x = layers.Dense(units=i["units"], activation=i["activation"],
                              name=i["name"])(x)
-
+        elif i["type"] == "Dropout":
+            x = layers.Dropout(i["rate"], name=i["name"])(x)
+        elif i["type"] == "BatchNormalization":
+            x = layers.BatchNormalization(name=i["name"])(x)
     model = models.Model(inputs, x)
     return model
 
@@ -440,7 +457,19 @@ def create_multi_layer_perception(config):
     return create_model("multi_layer_perception", config)
 
 
-def concatenate_neural_network(word_embedding, mlp, max_class, config):
+def create_bag_of_words(config):
+    """Create bag of words
+
+    Args:
+        config (dict): config
+
+    Returns:
+        any: model
+    """
+    return create_model("bag_of_words", config)
+
+
+def concatenate_neural_network(word_embedding, mlp, bag_of_words, max_class, config):
     """Concatenate neural network
 
     Args:
@@ -452,7 +481,8 @@ def concatenate_neural_network(word_embedding, mlp, max_class, config):
     Returns:
         Any: model
     """
-    x = layers.concatenate([mlp.output, word_embedding.output])
+    x = layers.concatenate(
+        [mlp.output, word_embedding.output, bag_of_words.output])
 
     steps = config["neural_network"]["concatenate"]["steps"].copy()
     for i in steps:
@@ -485,20 +515,21 @@ def get_model(nlp, dic_vocabulary, max_class, config):
 
     word_embedding = create_word_embedding(config, embeddings)
     mlp = create_multi_layer_perception(config)
-    y_out = concatenate_neural_network(word_embedding, mlp, max_class, config)
+    bag_of_words = create_bag_of_words(config)
+    y_out = concatenate_neural_network(
+        word_embedding, mlp, bag_of_words, max_class, config)
 
     optimize = config["neural_network"]["optimizer"]
     # metrics = config["neural_network"]["metrics"]
     loss = config["neural_network"]["loss"]
     model_mixed_data = models.Model(
-        inputs=[word_embedding.input, mlp.input], outputs=y_out)
+        inputs=[word_embedding.input, mlp.input, bag_of_words.input], outputs=y_out)
     model_mixed_data.compile(
         loss=loss, optimizer=optimize["name"], metrics=[metrics.binary_accuracy, "accuracy"])
 
     plot_model(model_mixed_data, to_file='artefact/model_plot.png',
                show_shapes=True, show_layer_names=True)
     return model_mixed_data
-
 
 
 def plot_results(training):
@@ -527,13 +558,14 @@ def plot_results(training):
     plt.close()
 
 
-def train_model(X_train_attributes, X_train_word_embedding, y_train, max_class, nlp,
+def train_model(X_train_attributes, X_train_word_embedding, X_train_bow, y_train, max_class, nlp,
                 dic_vocabulary, config):
     """Train model
 
     Args:
         X_train_attributes ([any]): Attributes
         X_train_word_embedding ([any]): Word embedding
+        X_train_bow([any]): Bag of words
         y_train ([any]): Labels
         max_class (int): Max class
         nlp (Word2Vec): Word2Vec model
@@ -560,7 +592,7 @@ def train_model(X_train_attributes, X_train_word_embedding, y_train, max_class, 
     verbose = config["verbose"]
     if config["verbose"]:
         print("Training / Fitting model...")
-    training = model.fit(x=[X_train_word_embedding, X_train_attributes], y=y_train,
+    training = model.fit(x=[X_train_word_embedding, X_train_attributes, X_train_bow], y=y_train,
                          batch_size=batch_size, epochs=epochs, shuffle=shuffle, verbose=verbose,
                          validation_split=config["test_size"])
     if config["verbose"]:
@@ -592,9 +624,11 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
     plt.clf()
     if config["y_classificaton_column"] == "TUI":
         fig = plt.subplots(figsize=(25, 25))
-        res_plot = sns.heatmap(pd.DataFrame(clf_report).iloc[:-1, :].T, annot=True, linewidths=.2)
+        res_plot = sns.heatmap(pd.DataFrame(
+            clf_report).iloc[:-1, :].T, annot=True, linewidths=.2)
     else:
-        res_plot = sns.heatmap(pd.DataFrame(clf_report).iloc[:-1, :].T, annot=True)
+        res_plot = sns.heatmap(pd.DataFrame(
+            clf_report).iloc[:-1, :].T, annot=True)
     fig = res_plot.get_figure()
     fig.savefig("artefact/results.png")
     plt.clf()
@@ -602,11 +636,12 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
     # Log metrics
     mlflow.log_metric("accuracy", accuracy)
     mlflow.log_metric("max_data", config["max_nb_data_per_class"])
-    
+
     # Log params
     mlflow.log_param("class", config["y_classificaton_column"])
     mlflow.log_param("features", " ".join(config["attributes_features"]))
-    mlflow.log_param("excluded", " ".join(config["drop_classificaton_columns"]))
+    mlflow.log_param("excluded", " ".join(
+        config["drop_classificaton_columns"]))
 
     # log artifacts
     mlflow.log_artifact("artefact/model_plot.png")
@@ -619,7 +654,8 @@ def evaluate_multi_classif(model, history, y_test, predicted, config):
     mlflow.end_run()
 
 
-def test_model(model, history, X_test_attributes, X_test_word_embedding, y_train, y_test, config):
+def test_model(model, history, X_test_attributes, X_test_word_embedding, X_test_bow,
+               y_train, y_test, config):
     """Test model
 
     Args:
@@ -627,11 +663,13 @@ def test_model(model, history, X_test_attributes, X_test_word_embedding, y_train
         history (any): History
         X_test_attributes ([[float]]): Attributes
         X_test_word_embedding (any): Word embedding
+        X_test_bow ([any]): Bag of words
         y_train ([any]): Train Labels
         y_test ([any]): Test Labels
         config (dict): config
     """
-    predicted_prob = model.predict([X_test_word_embedding, X_test_attributes])
+    predicted_prob = model.predict(
+        [X_test_word_embedding, X_test_attributes, X_test_bow])
     dic_y_mapping = {n: label for n, label in
                      enumerate(np.unique(y_train))}
     predicted = [dic_y_mapping[np.argmax(pred)] for pred in predicted_prob]
@@ -648,11 +686,17 @@ def train_and_test(config):
     """
     if config["verbose"]:
         print("Loading training / testing data...")
+
     # Data preparation
+
     data = get_processed_data(config)
-    X_train_attributes, X_test_attributes, X_train_corpus, X_test_corpus, y_train, y_test = \
-        get_train_test_data(data, config)
+    X_train_attributes, X_test_attributes, X_train_corpus, X_test_corpus, X_train_labels, \
+        X_test_labels, y_train, y_test = get_train_test_data(data, config)
     max_class = data[config["y_classificaton_column"]].nunique()
+
+    # Update MLP input shape
+    nb_attributes = X_train_attributes.shape[1]
+    config["neural_network"]["multi_layer_perception"]["steps"][0]["input_shape"] = nb_attributes
 
     # Word2Vec
     if config["verbose"]:
@@ -660,10 +704,14 @@ def train_and_test(config):
     X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary = word2vec(
         X_train_corpus, X_test_corpus, config)
 
-    nb_attributes = X_train_attributes.shape[1]
-    config["numerical_data_shape"] = nb_attributes
+    # Bag of words
+    if config["verbose"]:
+        print("Loading bag of words model...")
+    X_train_bow, X_test_bow, _bow_tokenizer= bag_of_words_gen(
+        X_train_labels, X_test_labels, config)
+    config["neural_network"]["bag_of_words"]["steps"][0]["input_shape"] = X_test_bow.shape[1]
 
-    # Set up panda dataframe with word embedding and attributes and y
+    # Debug
     column = config["y_classificaton_column"]
     datafram = pd.DataFrame()
     datafram[column] = y_train
@@ -673,11 +721,11 @@ def train_and_test(config):
     # Train the model
     if config["verbose"]:
         print("Training model...")
-    model, history = train_model(X_train_attributes, X_train_word_embedding,
+    model, history = train_model(X_train_attributes, X_train_word_embedding, X_train_bow,
                                  y_train, max_class, nlp, dic_vocabulary, config)
 
     # Test the model
     if config["verbose"]:
         print("Testing model...")
     test_model(model, history, X_test_attributes,
-               X_test_word_embedding, y_train, y_test, config)
+               X_test_word_embedding, X_test_bow, y_train, y_test, config)

@@ -3,7 +3,7 @@ verbose: true
 y_classificaton_column: "GUI" # Column which contains the classification result
 drop_classificaton_columns: []
 max_nb_data_per_class: 0 # Maximum number of rows to be classified. 0 if no limit
-attributes_features: ["Has_Def", "SAB", "Labels_Count", "Parents_Types"] # Possible values: Has_Def, SAB, Labels_Count, Parents_Types
+attributes_features: ["Has_Def", "SAB", "Parents_Types"] # Possible values: Has_Def, SAB, Parents_Types
 test_size: 0.3 # Percentage of data used for testing
 debug_output_path: ""
 
@@ -61,11 +61,41 @@ neural_network:
         type: "Dense"
         units: 10
         activation: "relu"
+  bag_of_words:
+    steps:
+      - name: "Input-Bag-Of-Words"
+        type: "Input"
+        input_shape: 0
+      - name: "Dense-1-BOW"
+        type: "Dense"
+        units: 128
+        activation: "relu"
+      - name: "Dense-2-BOW"
+        type: "Dense"
+        units: 512
+        activation: "relu"
+      - name: "Batch-Normalization-1-BOW"
+        type: "BatchNormalization"
+      - name: "Dense-3-BOW"
+        type: "Dense"
+        units: 128
+        activation: "relu"
+      - name: "Dense-4-BOW"
+        type: "Dense"
+        units: 512
+        activation: "relu"
+      - name: "Dropout-1-BOW"
+        type: "Dropout"
+        rate: 0.25
+      - name: "Dense-5-BOW"
+        type: "Dense"
+        units: 128
+        activation: "relu"
   concatenate:
     steps:
       - name: "Dense-1"
         type: "Dense"
-        units: 32
+        units: 152
         activation: "relu"
   out:
     name: "Final-Dense"

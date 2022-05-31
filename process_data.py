@@ -161,22 +161,6 @@ def one_hot_encoding_sabs(sabset, l_sab):
     return np.array([1 if x in sabs else 0 for x in sabset])
 
 
-def get_preprocessed_labels_count(data):
-    """This function get the preprocessed labels.
-
-    Args:
-        data (pd.DataFrame): dataframe with the preprocessed data
-
-    Returns:
-        pd.DataFrame: dataframe with the preprocessed labels
-    """
-    labels = data["Labels"].values
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2))
-    labels_count_np = vectorizer.fit_transform(labels)
-    labels_count_np = labels_count_np.toarray().tolist()
-    return labels_count_np
-
-
 def get_preprocessed_sab(data):
     """This function preprocess the SAB column.
 
