@@ -72,7 +72,10 @@ def repartition_visualisation_graph(data, path, config):
     # Plotting the univariate distribution of the data
     column = config["y_classificaton_column"]
 
-    fig, ax = plt.subplots()
+    if config["y_classificaton_column"] == "TUI":
+        fig, ax = plt.subplots(figsize=(25, 25))
+    else:
+        fig, ax = plt.subplots()
     fig.suptitle("Repartitions of " + column + "s", fontsize=12)
     data[column].reset_index().groupby(column).count().sort_values(by="index")\
         .plot(kind="barh", legend=False, ax=ax).grid(axis='x')
