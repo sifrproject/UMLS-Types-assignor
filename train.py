@@ -469,7 +469,7 @@ def create_bag_of_words(config):
     return create_model("bag_of_words", config)
 
 
-def concatenate_neural_network(word_embedding, mlp, bag_of_words, max_class, config):
+def concatenate_neural_network(models, max_class, config):
     """Concatenate neural network
 
     Args:
@@ -482,7 +482,7 @@ def concatenate_neural_network(word_embedding, mlp, bag_of_words, max_class, con
         Any: model
     """
     x = layers.concatenate(
-        [mlp.output, word_embedding.output, bag_of_words.output])
+        [i.output for i in models])
 
     steps = config["neural_network"]["concatenate"]["steps"].copy()
     for i in steps:
@@ -511,19 +511,30 @@ def get_model(nlp, dic_vocabulary, max_class, config):
     Returns:
         Any: Final model
     """
-    embeddings = get_embeddings(dic_vocabulary, nlp, config)
+    models_list = []
+    if "Def" in config["attributes_features"]:
+        embeddings = get_embeddings(dic_vocabulary, nlp, config)
+        word_embedding = create_word_embedding(config, embeddings)
+        models_list.append(word_embedding)
 
-    word_embedding = create_word_embedding(config, embeddings)
-    mlp = create_multi_layer_perception(config)
-    bag_of_words = create_bag_of_words(config)
+    if "Has_Def" in config["attributes_features"] or "SAB" in config["attributes_features"] or \
+            "Parents_Types" in config["attributes_features"]:
+        mlp = create_multi_layer_perception(config)
+        models_list.append(mlp)
+
+    if "Labels" in config["attributes_features"]:
+        bag_of_words = create_bag_of_words(config)
+        models_list.append(bag_of_words)
+
     y_out = concatenate_neural_network(
-        word_embedding, mlp, bag_of_words, max_class, config)
+        models_list, max_class, config)
 
     optimize = config["neural_network"]["optimizer"]
     # metrics = config["neural_network"]["metrics"]
     loss = config["neural_network"]["loss"]
+    inputs = [i.input for i in models_list]
     model_mixed_data = models.Model(
-        inputs=[word_embedding.input, mlp.input, bag_of_words.input], outputs=y_out)
+        inputs=inputs, outputs=y_out)
     model_mixed_data.compile(
         loss=loss, optimizer=optimize["name"], metrics=[metrics.binary_accuracy, "accuracy"])
 
@@ -592,7 +603,17 @@ def train_model(X_train_attributes, X_train_word_embedding, X_train_bow, y_train
     verbose = config["verbose"]
     if config["verbose"]:
         print("Training / Fitting model...")
-    training = model.fit(x=[X_train_word_embedding, X_train_attributes, X_train_bow], y=y_train,
+
+    features = []
+    if "Def" in config["attributes_features"]:
+        features.append(X_train_word_embedding)
+    if "Has_Def" in config["attributes_features"] or "SAB" in config["attributes_features"] or \
+            "Parents_Types" in config["attributes_features"]:
+        features.append(X_train_attributes)
+    if "Labels" in config["attributes_features"]:
+        features.append(X_train_bow)
+
+    training = model.fit(x=features, y=y_train,
                          batch_size=batch_size, epochs=epochs, shuffle=shuffle, verbose=verbose,
                          validation_split=config["test_size"])
     if config["verbose"]:
@@ -668,8 +689,15 @@ def test_model(model, history, X_test_attributes, X_test_word_embedding, X_test_
         y_test ([any]): Test Labels
         config (dict): config
     """
-    predicted_prob = model.predict(
-        [X_test_word_embedding, X_test_attributes, X_test_bow])
+    features = []
+    if "Def" in config["attributes_features"]:
+        features.append(X_test_word_embedding)
+    if "Has_Def" in config["attributes_features"] or "SAB" in config["attributes_features"] or \
+            "Parents_Types" in config["attributes_features"]:
+        features.append(X_test_attributes)
+    if "Labels" in config["attributes_features"]:
+        features.append(X_test_bow)
+    predicted_prob = model.predict(features)
     dic_y_mapping = {n: label for n, label in
                      enumerate(np.unique(y_train))}
     predicted = [dic_y_mapping[np.argmax(pred)] for pred in predicted_prob]
@@ -707,7 +735,7 @@ def train_and_test(config):
     # Bag of words
     if config["verbose"]:
         print("Loading bag of words model...")
-    X_train_bow, X_test_bow, _bow_tokenizer= bag_of_words_gen(
+    X_train_bow, X_test_bow, _bow_tokenizer = bag_of_words_gen(
         X_train_labels, X_test_labels, config)
     config["neural_network"]["bag_of_words"]["steps"][0]["input_shape"] = X_test_bow.shape[1]
 

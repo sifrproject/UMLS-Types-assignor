@@ -3,7 +3,7 @@ verbose: true
 y_classificaton_column: "GUI" # Column which contains the classification result
 drop_classificaton_columns: []
 max_nb_data_per_class: 0 # Maximum number of rows to be classified. 0 if no limit
-attributes_features: ["Has_Def", "SAB", "Parents_Types"] # Possible values: Has_Def, SAB, Parents_Types
+attributes_features: ["Has_Def", "SAB", "Parents_Types", "Labels", "Def"] # Possible values: Has_Def, SAB, Parents_Types, Labels, Def
 test_size: 0.3 # Percentage of data used for testing
 debug_output_path: ""
 
