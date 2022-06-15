@@ -34,7 +34,7 @@ $ pip install -r requirements.txt
 2- Launch pipeline
 
 ```bash
-$ python main.py
+$ python main.py --run_name="NAME_OF_THE_EXPERIMENT_RUN"
 ```
 
 *You can use flags to customize the args in the pipeline*
@@ -42,24 +42,20 @@ $ python main.py
 ```bash
 $ python main.py -h
 
-> usage: main.py [-h] [--verbose] [--only_source] [--only_preprocess]
-               [--from_preprocess] [--only_training] [--limit LIMIT]
-               [--debug_output_path DEBUG_OUTPUT_PATH]
+> usage: main.py [-h] [--verbose] [--only_source] [--only_preprocess] [--from_preprocess] [--only_training]
+               [--limit LIMIT] [--debug_output_path DEBUG_OUTPUT_PATH] --run_name RUN_NAME
 
 optional arguments:
   -h, --help            show this help message and exit
   --verbose             Active verbose mode.
-  --only_source         Pipeline launchs only the generation of the source
-                        data.
-  --only_preprocess     Pipeline launchs only the preprocess of the source
-                        data.
-  --from_preprocess     Pipeline launchs from the preprocess of the source
-                        data.
-  --only_training       Pipeline launchs only the training of the preprocessed
-                        data.
+  --only_source         Pipeline launchs only the generation of the source data.
+  --only_preprocess     Pipeline launchs only the preprocess of the source data.
+  --from_preprocess     Pipeline launchs from the preprocess of the source data.
+  --only_training       Pipeline launchs only the training of the preprocessed data.
   --limit LIMIT         Limit of the source data number generated.
   --debug_output_path DEBUG_OUTPUT_PATH
                         Path of the output log.
+  --run_name RUN_NAME   REQUIRED: Name of the run.
 ```
 
 3- Use MlFlow UI to visualize data in [**localhost:5000**](http://127.0.0.1:5000/)
