@@ -51,7 +51,7 @@ def save_to_csv(X_data: list, Y_data: list, db_index: int):
         db_index (int): Index of the database
     """
     data = pd.DataFrame(X_data, columns=['CUI', 'Corpus', 'Has_Definition', 'Prefered_Label',
-                                         'Labels', 'SAB', 'Parents_Types'])
+                                         'Labels', 'SAB', 'Parents_Types_TUI', 'Parents_Types_GUI'])
     data = pd.concat(
         [data, pd.DataFrame(Y_data, columns=['TUI', 'GUI'])], axis=1)
     # Save X and Y in the same csv file
@@ -162,13 +162,16 @@ def generate_source_data(limit: int, config: dict, verbose=False):
             if verbose:
                 print("Getting parents informations...")
             try:
-                type = ColumnType.TUI if config["y_classificaton_column"] == "TUI" \
-                    else ColumnType.GUI
-                parents_types = meta.get_all_type_of_parent_from_cui(
-                    cui, type, gui_indexes)
-                parents_types = " ".join(parents_types)
+                parents_types_TUI = meta.get_all_type_of_parent_from_cui(
+                    cui, ColumnType.TUI , gui_indexes)
+                parents_types_TUI = " ".join(parents_types_TUI)
+                
+                parents_types_GUI = meta.get_all_type_of_parent_from_cui(
+                    cui, ColumnType.GUI , gui_indexes)
+                parents_types_GUI = " ".join(parents_types_GUI)
             except Exception as e:
-                parents_types = ""
+                parents_types_TUI = ""
+                parents_types_GUI = ""
                 print(str(e))
             if verbose:
                 print("Done.")
@@ -180,7 +183,8 @@ def generate_source_data(limit: int, config: dict, verbose=False):
                 prefered_label,
                 labels,
                 sab,
-                parents_types
+                parents_types_TUI,
+                parents_types_GUI
             ]
             X_data.append(row)
             Y_data.append([tui, gui])

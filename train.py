@@ -51,6 +51,14 @@ def get_processed_data(config):
                                           if len(x) > max_nb_data_per_class else x).reset_index(drop=True)
         repartition_visualisation_graph(
             data, "artefact/training-repartitions.png", config)
+    type = ColumnType.TUI if config["y_classificaton_column"] == "TUI" \
+            else ColumnType.GUI
+    if type == ColumnType.TUI:
+        data.drop(columns=["Parents_Types_GUI"], inplace=True)
+        data.rename(columns={"Parents_Types_TUI": "Parents_Types"}, inplace=True)
+    else:
+        data.drop(columns=["Parents_Types_TUI"], inplace=True)
+        data.rename(columns={"Parents_Types_GUI": "Parents_Types"}, inplace=True)
     return data
 
 
