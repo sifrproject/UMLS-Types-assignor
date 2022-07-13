@@ -163,6 +163,11 @@ def one_hot_encoding_sabs(sabset, l_sab):
     sabs = l_sab.split("/")
     return np.array([1 if x in sabs else 0 for x in sabset])
 
+def apply_SAB_preprocess(source):
+    """Function to apply source for one concept"""
+    all_sources = get_tuple_of_languages_sources()
+    sabset = [x for x in all_sources]
+    return one_hot_encoding_sabs(sabset, source)
 
 def get_preprocessed_sab(data):
     """This function preprocess the SAB column.

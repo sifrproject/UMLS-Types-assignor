@@ -5,6 +5,7 @@ from umls_api.authentication_umls_api import Authentication
 from umls_api.mysql_connection import DatabaseConnection
 from umls_api.languages import Languages
 from umls_api.column_type import ColumnType
+from difflib import SequenceMatcher
 
 f = open('umls_api/sources.json', 'r')
 sources = json.load(f)
@@ -64,6 +65,25 @@ def get_tuple_of_languages_sources(language=Languages.ENG) -> Tuple[str]:
     return tuple([source['abbreviation'] for source in sources
                   if source['language'] == language.value])
 
+def get_umls_source_abreviation_nearby(source_abreviation: str) -> str:
+    """Gets the UMLS source abbreviation nearby
+
+    Args:
+        source_abreviation (str): The source abbreviation to get the UMLS source abbreviation nearby. 
+
+    Returns:
+        str: The UMLS source abbreviation nearby
+    """
+    global sources
+    language=Languages.ENG
+    scores = []
+    for i in range(len(sources)):
+        source = sources[i]
+        if source['language'] == language.value:
+            similarity = SequenceMatcher(None, source_abreviation, source['abbreviation']).ratio()
+            scores.append({"score": similarity, "source": source['abbreviation']})
+    scores.sort(key=lambda x: x['score'], reverse=True)
+    return scores[0]['source']
 
 class MetathesaurusQueries:
     """Metathesaurus API"""
