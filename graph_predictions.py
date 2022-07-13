@@ -128,6 +128,7 @@ def set_graph_prediction():
         print("Loading concepts...")
         root_link = portal.get_root_of_tree(name, source)
         features = portal.get_features_from_link(root_link, None)
+        features['source'] = apply_SAB_preprocess(features['source'])
         new_node = Node(features)
         linked_tree = LinkedTree(new_node)
         children_link = features['children']
