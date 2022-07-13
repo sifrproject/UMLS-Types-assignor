@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from process_data import apply_SAB_preprocess
+from process_data import apply_SAB_preprocess, utils_preprocessing_corpus
 from umls_api.bioportal_api import BioPortalAPI
+import nltk
 
 def get_BIOPORTAL_API_KEY():
     # Import the .env file
@@ -108,13 +109,13 @@ class LinkedTree:
             G.add_edge(child, parent_node)
             self.recursively_add_edges(child, G)
 
-def set_graph_prediction():
+def set_graph_prediction(config):
     answer = input("Do you want to test model graph prediction? (y/n) ")
     if answer == "y" or answer == "Y" or answer == "":
         answer = input("Enter the name of the concept (default=Melanoma): ")
         name = answer if answer != "" else "Melanoma"
-        answer = input("Enter the source of the concept (default=MedDRA): ")
-        source = answer if answer != "" else "MedDRA"
+        answer = input("Enter the source of the concept (default=MESH): ")
+        source = answer if answer != "" else "MESH"
         answer = input("Enter the depth of the graph (default=3): ")
         try: depth = int(answer) if answer != "" else 3
         except: depth = 3
@@ -128,7 +129,13 @@ def set_graph_prediction():
         print("Loading concepts...")
         root_link = portal.get_root_of_tree(name, source)
         features = portal.get_features_from_link(root_link, None)
+        
+        # SAB
         features['source'] = apply_SAB_preprocess(features['source'])
+        # Corpus
+        stopwords = nltk.corpus.stopwords.words("english")
+        features['definition'] = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
+        
         new_node = Node(features)
         linked_tree = LinkedTree(new_node)
         children_link = features['children']
@@ -142,8 +149,14 @@ def set_graph_prediction():
                 features = portal.get_features_from_link(link, parents_code_id)
                 if features is None:
                     continue
+                
+                # SAB
                 features['source'] = apply_SAB_preprocess(features['source'])
                 print(features['source'])
+                # Corpus
+                features['definition'] = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
+                print(features['definition'])
+                
                 new_node = Node(features)
                 linked_tree.add_node(parents_code_id, new_node)
                 children_link = features['children']
@@ -157,4 +170,8 @@ def set_graph_prediction():
         linked_tree.display_node_graph() # * Display when the model prediected all nodes
         return linked_tree
     
-set_graph_prediction()
+test_config = {
+    "stemming": False,
+    "lemmitization": True
+}
+set_graph_prediction(test_config)
