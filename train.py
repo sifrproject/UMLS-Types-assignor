@@ -714,14 +714,6 @@ def test_model(model, history, X_test_attributes, X_test_word_embedding, X_test_
         features.append(X_test_attributes)
     if "Labels" in config["attributes_features"]:
         features.append(X_test_bow)
-    print("Predicting...")
-    print("Test size:", len(features))
-    print("Features", features)
-    print("Feature[0]", features[0])
-    print("Typeof", type(features))
-    print("typeof [0]", type(features[0]))
-    print("Feature[0][0]", features[0][0])
-    print("typeof[0][0]", type(features[0][0]))
     predicted_prob = model.predict(features)
     dic_y_mapping = {n: label for n, label in
                      enumerate(np.unique(y_train))}

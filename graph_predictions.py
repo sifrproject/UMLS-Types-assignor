@@ -164,7 +164,6 @@ class LinkedTree:
                 features_attributes.append(np.stack(parents_type_format))
 
             attributes = np.concatenate((features_attributes[0], features_attributes[1], features_attributes[2]), None)
-            print("Attributes", attributes)
             
             features.append(np.stack([attributes]))
         if "Labels" in config["attributes_features"]:
