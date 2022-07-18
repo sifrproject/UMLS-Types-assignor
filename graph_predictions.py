@@ -1,9 +1,19 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from process_data import apply_SAB_preprocess, utils_preprocessing_corpus
-from umls_api.bioportal_api import BioPortalAPI
-import nltk
+import numpy as np
+from process_data import get_parents_type_format
+
+def get_nb_rows(list_of_features):
+    """Get the number of rows of a list of features
+
+    Args:
+        list_of_features (List[List[Any]]): list of features
+
+    Returns:
+        int: nb_rows
+    """
+    return list_of_features[0].shape[0]
 
 def get_BIOPORTAL_API_KEY():
     # Import the .env file
@@ -26,14 +36,15 @@ class Node:
         self.labels = features['labels']
         self.source = features['source']
         self.code_id = features['code_id']
-        self.predicted = None # T127
-        self.is_good_prediction = None # None | True | False
-        self.parents_code_id = features['parents_code_id']
-        self.next = []
-        self.previous = []
         self.has_definition = features['has_definition']
         self.definition = features['definition']
         self.parents_type = features['parents_type']
+        self.parents_code_id = features['parents_code_id']
+        self.predicted = None # T127
+        self.real_type = features['semantic_type'] # T127
+        self.is_good_prediction = None # None | True | False
+        self.next = []
+        self.previous = []
 
     def add_child(self, child):
         self.next.append(child)
@@ -108,70 +119,55 @@ class LinkedTree:
             parent_node = self.get_node_from_code_id(child.parents_code_id)
             G.add_edge(child, parent_node)
             self.recursively_add_edges(child, G)
+            
+    def predict_graph(self, model, config):
+        self.predict_recursively(self.nodes[0], model, config)
 
-def set_graph_prediction(config):
-    answer = input("Do you want to test model graph prediction? (y/n) ")
-    if answer == "y" or answer == "Y" or answer == "":
-        answer = input("Enter the name of the concept (default=Melanoma): ")
-        name = answer if answer != "" else "Melanoma"
-        answer = input("Enter the source of the concept (default=MESH): ")
-        source = answer if answer != "" else "MESH"
-        answer = input("Enter the depth of the graph (default=3): ")
-        try: depth = int(answer) if answer != "" else 3
-        except: depth = 3
-        
-        BIOPORTAL_API_KEY = get_BIOPORTAL_API_KEY()
-        if BIOPORTAL_API_KEY is None:
-            print("BIOPORTAL_API_KEY is not set.")
-            return None
-        portal = BioPortalAPI(api_key=BIOPORTAL_API_KEY)
+    def predict_recursively(self, node, model, config):
+        if node.predicted is None:
+            features = self.get_graph_features(node, config)
+            print("Features", features)
+            node.predicted = model.predict(features)
+            print("Predicted", node.predicted)
+            # Update the information to the children
+            node.is_good_prediction = True if node.predicted == node.real_type else False
+            self.update_parents_type_of_children(node)
+        for child in node.next:
+            self.predict_recursively(child, model, config)
+            
+    def update_parents_type_of_children(self, node):
+        for child in node.next:
+            child.parents_type = node.predicted
 
-        print("Loading concepts...")
-        root_link = portal.get_root_of_tree(name, source)
-        features = portal.get_features_from_link(root_link, None)
-        
-        # SAB
-        features['source'] = apply_SAB_preprocess(features['source'])
-        # Corpus
-        stopwords = nltk.corpus.stopwords.words("english")
-        features['definition'] = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
-        
-        new_node = Node(features)
-        linked_tree = LinkedTree(new_node)
-        children_link = features['children']
-        parents_code_id = features['code_id']
-        children_links_list = portal.get_children_links(children_link)
+    def get_graph_features(self, node, config):
+        features = []
+        if "Def" in config["attributes_features"]:
+            features.append(np.stack([node.definition]))
+        if "Has_Def" in config["attributes_features"] or "SAB" in config["attributes_features"] or \
+                "Parents_Types" in config["attributes_features"]:
+            features_attributes = []
+            # Has_Def
+            if "Has_Def" in config["attributes_features"]:
+                has_def = np.stack([1 if node.has_definition is True else False])
+                features_attributes.append(has_def)
+            # SAB
+            if "SAB" in config["attributes_features"]:
+                source = np.stack(node.source)
+                features_attributes.append(source)
+            # Parents_Types
+            if "Parents_Types" in config["attributes_features"]:
+                if node.parents_type is not None:
+                    parents_type = node.parents_type
+                else:
+                    parents_type = ""
+                parents_type_format = get_parents_type_format("TUI", [parents_type])
+                features_attributes.append(np.stack(parents_type_format))
 
-        def recursive_add_all_nodes(portal, children_links_list, parents_code_id, max_depth):
-            if max_depth == 0:
-                return
-            for link in children_links_list:
-                features = portal.get_features_from_link(link, parents_code_id)
-                if features is None:
-                    continue
-                
-                # SAB
-                features['source'] = apply_SAB_preprocess(features['source'])
-                print(features['source'])
-                # Corpus
-                features['definition'] = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
-                print(features['definition'])
-                
-                new_node = Node(features)
-                linked_tree.add_node(parents_code_id, new_node)
-                children_link = features['children']
-                new_parents_code_id = features['code_id']
-                children_links_list = portal.get_children_links(children_link)
-                recursive_add_all_nodes(
-                    portal, children_links_list, new_parents_code_id, max_depth - 1)
-
-        recursive_add_all_nodes(portal, children_links_list, parents_code_id, depth - 1)
-        print("Number of nodes", len(linked_tree.nodes))
-        linked_tree.display_node_graph() # * Display when the model prediected all nodes
-        return linked_tree
+            attributes = np.concatenate((features_attributes[0], features_attributes[1], features_attributes[2]), None)
+            print("Attributes", attributes)
+            
+            features.append(np.stack([attributes]))
+        if "Labels" in config["attributes_features"]:
+            features.append(np.stack([node.labels]))
+        return features
     
-test_config = {
-    "stemming": False,
-    "lemmitization": True
-}
-set_graph_prediction(test_config)

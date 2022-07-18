@@ -185,6 +185,18 @@ def get_preprocessed_sab(data):
         lambda x: one_hot_encoding_sabs(sabset, x)).values
     return values
 
+def get_parents_type_format(col_type, parents_types):
+    if col_type == ColumnType.GUI:
+        f = open("artefact/type_gui.txt", "r")
+        content = f.read()
+        type_voc = content.split()
+    else:
+        f = open("artefact/type_tui.txt", "r")
+        content = f.read()
+        type_voc = content.split()
+    vectorizer = TfidfVectorizer(vocabulary=type_voc, lowercase=False)
+    type_frequency = vectorizer.fit_transform(parents_types).toarray()
+    return type_frequency
 
 def get_preprocessed_parents_types(data: any, col_type: ColumnType):
     """This function preprocess the Parents Types column.
@@ -199,17 +211,7 @@ def get_preprocessed_parents_types(data: any, col_type: ColumnType):
     data['Parents_Types'] = data['Parents_Types'].fillna("")
 
     parents_types = data["Parents_Types"].values
-    if col_type == ColumnType.GUI:
-        f = open("artefact/type_gui.txt", "r")
-        content = f.read()
-        type_voc = content.split()
-    else:
-        f = open("artefact/type_tui.txt", "r")
-        content = f.read()
-        type_voc = content.split()
-    vectorizer = TfidfVectorizer(vocabulary=type_voc, lowercase=False)
-    type_frequency = vectorizer.fit_transform(parents_types).toarray()
-    return type_frequency
+    return get_parents_type_format(col_type, parents_types)
 
 
 def preprocess(config):

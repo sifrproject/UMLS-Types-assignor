@@ -77,20 +77,21 @@ class BioPortalAPI:
                     continue
                 else:
                     source = get_source(result['@id'])
-                    list_sources.append({"source_name": source, "result_id": i})
+                    list_sources.append({"source_name": source, "result_id": i, "prefLabel": result['prefLabel']})
 
             if len(list_sources) == 0: # Error handling
                 print("No results found for", name, source)
                 return None
 
             for i in range(len(list_sources)):
-                print(str(i) + " => " + list_sources[i]["source_name"])
-            source_id = input("Select source: ")
+                print(str(i) + " => [" + list_sources[i]["source_name"] + "] " + list_sources[i]["prefLabel"])
+            source_id = input("Select concept: ")
 
             try:
                 source_id = int(source_id)
             except Exception as e:
                 print("No source selected")
+                exit(0)
                 return None
 
             return results["collection"][list_sources[source_id]["result_id"]]
@@ -129,6 +130,7 @@ class BioPortalAPI:
             "has_definition": True if definition is not None and len(definition) > 0 else False,
             "source": self.source if self.source is not None else None,
             "parents_type": None,
+            "semantic_type": results['semanticType'],
             "code_id": get_code_id(results['@id']),
             "parents_code_id": parents_code_id,
             "children": results['links']['children']

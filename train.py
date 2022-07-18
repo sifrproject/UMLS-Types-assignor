@@ -1,9 +1,11 @@
+import multiprocessing
 import time
 
 # Data
 import pandas as pd
 import numpy as np
 from imblearn.over_sampling import SMOTE
+import nltk
 
 # Plotting
 import matplotlib.pyplot as plt
@@ -11,6 +13,7 @@ import seaborn as sns
 
 # Word Embedding
 import gensim
+from graph_predictions import LinkedTree, Node, get_BIOPORTAL_API_KEY
 
 # Neural network
 from tensorflow.keras import models, layers, preprocessing as kprocessing
@@ -22,8 +25,9 @@ from keras.utils.vis_utils import plot_model  # Plot
 import mlflow
 import mlflow.keras
 
-from process_data import get_preprocessed_parents_types, get_preprocessed_sab, repartition_visualisation_graph
+from process_data import apply_SAB_preprocess, get_preprocessed_parents_types, get_preprocessed_sab, repartition_visualisation_graph, utils_preprocessing_corpus
 from umls_api.column_type import ColumnType
+from umls_api.bioportal_api import BioPortalAPI
 
 
 def get_processed_data(config):
@@ -215,18 +219,22 @@ def train_w2v(train_corpus, config):
 
     # Detect Bigrams (eg. ['I am', 'a student', '.'])
     bigrams_detector = gensim.models.phrases.Phrases(lst_corpus, delimiter=" ",
-                                                     min_count=5, threshold=10)
+                                                     min_count=30, progress_per=10000)
     bigrams_detector = gensim.models.phrases.Phraser(bigrams_detector)
     # Detect Trigrams (eg. ['I am a', 'student.'])
     trigrams_detector = gensim.models.phrases.Phrases(bigrams_detector[lst_corpus],
-                                                      delimiter=" ", min_count=5, threshold=10)
+                                                      delimiter=" ", min_count=30, progress_per=10000)
     trigrams_detector = gensim.models.phrases.Phraser(trigrams_detector)
 
+    # https://www.datatechnotes.com/2019/05/word-embedding-with-keras-in-python.html
     # Fit Word2Vec
+    cores = multiprocessing.cpu_count() # Count the number of cores in a computer
     nlp = gensim.models.word2vec.Word2Vec(lst_corpus,
                                           vector_size=config["vector_size"],
                                           window=config["window"], min_count=50, sg=1,
-                                          epochs=config["w2v_epochs"])
+                                          epochs=config["w2v_epochs"],
+                                          negative=20,
+                                        workers=cores-1)
 
     if config["verbose"]:
         print(
@@ -322,7 +330,8 @@ def word2vec(training_corpus, testing_corpus, config):
     print("Applying word2vec model to testing_corpus...")
     X_test_word_embedding = apply_w2v(
         testing_corpus, bigrams_detector, trigrams_detector, tokenizer, config)
-    return X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary
+    return X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary, \
+        tokenizer, bigrams_detector, trigrams_detector
 
 
 def bag_of_words_gen(X_train_labels, X_test_labels, config):
@@ -705,6 +714,14 @@ def test_model(model, history, X_test_attributes, X_test_word_embedding, X_test_
         features.append(X_test_attributes)
     if "Labels" in config["attributes_features"]:
         features.append(X_test_bow)
+    print("Predicting...")
+    print("Test size:", len(features))
+    print("Features", features)
+    print("Feature[0]", features[0])
+    print("Typeof", type(features))
+    print("typeof [0]", type(features[0]))
+    print("Feature[0][0]", features[0][0])
+    print("typeof[0][0]", type(features[0][0]))
     predicted_prob = model.predict(features)
     dic_y_mapping = {n: label for n, label in
                      enumerate(np.unique(y_train))}
@@ -713,6 +730,81 @@ def test_model(model, history, X_test_attributes, X_test_word_embedding, X_test_
 
 ######################################################################################
 
+def set_graph_prediction(bow_tokenizer, we_tokenizer, we_bigrams_detector, we_trigrams_detector, config):
+    answer = input("Do you want to test model graph prediction? (y/n) ")
+    if answer == "y" or answer == "Y" or answer == "":
+        answer = input("Enter the name of the concept (default=Melanoma): ")
+        name = answer if answer != "" else "Melanoma"
+        answer = input("Enter the source of the concept (default=MESH): ")
+        source = answer if answer != "" else "MESH"
+        answer = input("Enter the depth of the graph (default=2): ")
+        try: depth = int(answer) if answer != "" else 2
+        except: depth = 3
+        
+        BIOPORTAL_API_KEY = get_BIOPORTAL_API_KEY()
+        if BIOPORTAL_API_KEY is None:
+            print("BIOPORTAL_API_KEY is not set.")
+            return None
+        portal = BioPortalAPI(api_key=BIOPORTAL_API_KEY)
+
+        print("Loading concepts...")
+        root_link = portal.get_root_of_tree(name, source)
+        features = portal.get_features_from_link(root_link, None)
+        
+        # Labels
+        if bow_tokenizer is not None:
+            sequences = bow_tokenizer.texts_to_sequences([features['labels']])
+            bow = bow_tokenizer.sequences_to_matrix(sequences, mode='tfidf')
+            features['labels'] = bow[0]
+        # SAB
+        features['source'] = apply_SAB_preprocess(features['source'])
+        # Corpus
+        stopwords = nltk.corpus.stopwords.words("english")
+        definition = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
+        we_definitions = apply_w2v([definition], we_bigrams_detector, we_trigrams_detector, we_tokenizer, config)
+        features['definition'] = we_definitions[0]
+
+        new_node = Node(features)
+        linked_tree = LinkedTree(new_node)
+        children_link = features['children']
+        parents_code_id = features['code_id']
+        children_links_list = portal.get_children_links(children_link)
+
+        def recursive_add_all_nodes(portal, children_links_list, parents_code_id, max_depth):
+            if max_depth == 0:
+                return
+            for link in children_links_list:
+                features = portal.get_features_from_link(link, parents_code_id)
+                if features is None:
+                    continue
+                
+                # Labels
+                if bow_tokenizer is not None:
+                    sequences = bow_tokenizer.texts_to_sequences([features['labels']])
+                    bow = bow_tokenizer.sequences_to_matrix(sequences, mode='tfidf')
+                    features['labels'] = bow[0]
+                # SAB
+                features['source'] = apply_SAB_preprocess(features['source'])
+                # Corpus
+                definition = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
+                we_definitions = apply_w2v([definition], we_bigrams_detector, we_trigrams_detector, we_tokenizer, config)
+                features['definition'] = we_definitions[0]
+                
+                new_node = Node(features)
+                linked_tree.add_node(parents_code_id, new_node)
+                children_link = features['children']
+                new_parents_code_id = features['code_id']
+                children_links_list = portal.get_children_links(children_link)
+                recursive_add_all_nodes(
+                    portal, children_links_list, new_parents_code_id, max_depth - 1)
+
+        recursive_add_all_nodes(portal, children_links_list, parents_code_id, depth - 1)
+        return linked_tree
+    return None
+
+def test_graph(model, linked_tree, config):
+    linked_tree.predict_graph(model, config)
+    pass
 
 def train_and_test(config):
     """Training and testing step
@@ -737,13 +829,14 @@ def train_and_test(config):
     # Word2Vec
     if config["verbose"]:
         print("Loading word2vec model...")
-    X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary = word2vec(
-        X_train_corpus, X_test_corpus, config)
+    X_train_word_embedding, X_test_word_embedding, nlp, dic_vocabulary, \
+        we_tokenizer, we_bigrams_detector, we_trigrams_detector = \
+            word2vec(X_train_corpus, X_test_corpus, config)
 
     # Bag of words
     if config["verbose"]:
         print("Loading bag of words model...")
-    X_train_bow, X_test_bow, _bow_tokenizer = bag_of_words_gen(
+    X_train_bow, X_test_bow, bow_tokenizer = bag_of_words_gen(
         X_train_labels, X_test_labels, config)
     config["neural_network"]["bag_of_words"]["steps"][0]["input_shape"] = X_test_bow.shape[1]
 
@@ -751,7 +844,7 @@ def train_and_test(config):
     column = config["y_classificaton_column"]
     datafram = pd.DataFrame()
     datafram[column] = y_train
-    repartition_visualisation_graph(datafram, "artefact/testing-repartition.png",
+    repartition_visualisation_graph(datafram, "artefact/training2-repartition.png",
                                     config)
 
     # Train the model
@@ -765,3 +858,7 @@ def train_and_test(config):
         print("Testing model...")
     test_model(model, history, X_test_attributes,
                X_test_word_embedding, X_test_bow, y_train, y_test, config)
+    
+    linked_tree = set_graph_prediction(bow_tokenizer, we_tokenizer, we_bigrams_detector, we_trigrams_detector, config)
+    if linked_tree is not None:
+        test_graph(model, linked_tree, config)
