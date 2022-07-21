@@ -40,9 +40,7 @@ class Node:
         self.definition = features['definition']
         self.parents_type = features['parents_type']
         self.parents_code_id = features['parents_code_id']
-        self.predicted = None # T127
-        self.real_type = features['semantic_type'] # T127
-        self.is_good_prediction = None # None | True | False
+        self.prediction = None # T127
         self.next = []
         self.previous = []
 
@@ -120,24 +118,25 @@ class LinkedTree:
             G.add_edge(child, parent_node)
             self.recursively_add_edges(child, G)
             
-    def predict_graph(self, model, config):
-        self.predict_recursively(self.nodes[0], model, config)
+    def predict_graph(self, model, dic_y_mapping, config):
+        for child in self.nodes[0].next:
+            self.predict_recursively(child, model, dic_y_mapping, config)
 
-    def predict_recursively(self, node, model, config):
-        if node.predicted is None:
+    def predict_recursively(self, node, model, dic_y_mapping, config):
+        if node.prediction is None:
+            print("Predicting node: " + node.label)
             features = self.get_graph_features(node, config)
-            print("Features", features)
-            node.predicted = model.predict(features)
-            print("Predicted", node.predicted)
-            # Update the information to the children
-            node.is_good_prediction = True if node.predicted == node.real_type else False
+            predicted_prob = model.predict(features)
+            predicted = [dic_y_mapping[np.argmax(pred)] for pred in predicted_prob]
+            node.prediction = predicted[0]
+            print("Predicted", node.prediction)
             self.update_parents_type_of_children(node)
         for child in node.next:
-            self.predict_recursively(child, model, config)
+            self.predict_recursively(child, model, dic_y_mapping, config)
             
     def update_parents_type_of_children(self, node):
         for child in node.next:
-            child.parents_type = node.predicted
+            child.parents_type = node.prediction
 
     def get_graph_features(self, node, config):
         features = []
@@ -170,3 +169,21 @@ class LinkedTree:
             features.append(np.stack([node.labels]))
         return features
     
+    def save_prediction_to_ttl(self, source, config):
+        # Save the prediction to a ttl file
+        f = open("artefact/predictions_" + str(source) + ".ttl", "w")
+        namespace_ontology = "@prefix onto: <https://data.bioontology.org/ontologies/> .\n"
+        namespace_bpm = "@prefix sty: <http://purl.bioontology.org/ontology/STY/> .\n"
+        f.write(namespace_ontology)
+        f.write(namespace_bpm)
+        f.write("\n")
+
+        def recusively_write_prediction(node, f):
+            if node.prediction is not None:
+                f.write("onto:" + str(source) + " " + node.code_id + " sty:" + node.prediction + "\n")
+            for child in node.next:
+                recusively_write_prediction(child, f)
+
+        recusively_write_prediction(self.nodes[0], f)
+        f.close()
+

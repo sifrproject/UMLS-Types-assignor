@@ -4,10 +4,6 @@ import requests
 
 from umls_api.metathesaurus_queries import get_umls_source_abreviation_nearby
 
-def get_code_id(str):
-    """Unique concept code from BioPortal link @id concept"""
-    return str.split('#')[-1][1:]
-
 def get_source(str):
     str = str[::-1]
     str = str.split('/')[1]
@@ -20,7 +16,7 @@ class BioPortalAPI:
     def __init__(self, api_key):
         """Initialize the BioPortalAPI class."""
         self.api_key = api_key
-        self.base_url = "https://data.bioontology.org/"
+        self.base_url = "https://data.bioontology.org/ontologies/"
         self.source = None
 
     def request_url(self, url):
@@ -35,80 +31,44 @@ class BioPortalAPI:
             print("request_url", str(e))
             return None
 
-    def request_concept_by_name_and_source(self, name, source):
-        """Get a concept by name and source."""
+    def request_concept_by_source(self, source):
+        """Get a concept by source."""
         try:
-            url = self.base_url + "search?q=" + name
-            if source is not None:
-                url += "&ontologies=" + source
+            url = self.base_url + str(source) + "/classes/roots"
             print("URL: ", url)
             return self.request_url(url)
         except Exception as e:
-            print("request_concept_by_name_and_source", str(e))
+            print("request_concept_by_source", str(e))
             return None
 
-    def get_concept_by_name_and_source(self, name, source):
-        """Get a concept by name and source.
+    def get_concept_by_source(self, source):
+        """Get a concept by source.
 
         Args:
-            name (str): The name of the concept.
             source (str): The source of the concept.
 
         Returns:
             dict: The concept.
         """
         try:
-            results = self.request_concept_by_name_and_source(name, source)
+            results = self.request_concept_by_source(source)
             
             # Error handling
-            if results is not None and "errors" in results and "Notice that acronyms are case sensitive" in results['errors'][0]:
-                print("Error acronym case sensitive")
-                results = self.request_concept_by_name_and_source(name, None)
-            if results is not None and "collection" in results and len(results['collection']) == 0:
-                results = self.request_concept_by_name_and_source(name, None)
-            if results is None or not "collection" in results:
-                print("get_concept_by_name_and_source", "No results found.")
+            if results is None:
+                print("get_concept_by_source", "No results found.")
                 return None
 
-            list_sources = []
-            for i in range(len(results['collection'])):
-                result = results['collection'][i]
-                if "cui" not in result or len(result['cui']) == 0: # Only if res is in UMLS
-                    continue
-                else:
-                    source = get_source(result['@id'])
-                    list_sources.append({"source_name": source, "result_id": i, "prefLabel": result['prefLabel']})
-
-            if len(list_sources) == 0: # Error handling
-                print("No results found for", name, source)
-                return None
-
-            for i in range(len(list_sources)):
-                print(str(i) + " => [" + list_sources[i]["source_name"] + "] " + list_sources[i]["prefLabel"])
-            source_id = input("Select concept: ")
-
-            try:
-                source_id = int(source_id)
-            except Exception as e:
-                print("No source selected")
-                exit(0)
-                return None
-
-            return results["collection"][list_sources[source_id]["result_id"]]
+            return results
         except Exception as e:
-            print("get_concept_by_name_and_source exception", str(e))
+            print("get_concept_by_source exception", str(e))
             return None
 
-    def get_root_of_tree(self, name, source):
-        results = self.get_concept_by_name_and_source(name, source)
+    def get_roots_of_tree(self, source):
+        results = self.get_concept_by_source(source)
         if results is None:
             print("get_root_of_tree", "No results found.")
             return None
-        bioportal_source_abreviation = get_source(results['@id'])
-        umls_source_abreviation = get_umls_source_abreviation_nearby(bioportal_source_abreviation)
-        self.source = umls_source_abreviation
-        print("Source selected: " + str(bioportal_source_abreviation) + ' -> ' + str(self.source))
-        return results['links']['self']
+        return results
 
     def get_features_from_link(self, link, parents_code_id):
         results = self.request_url(link)
@@ -128,10 +88,10 @@ class BioPortalAPI:
             "labels": results['prefLabel'] + ' ' + labels,
             "definition": definition,
             "has_definition": True if definition is not None and len(definition) > 0 else False,
-            "source": self.source if self.source is not None else None,
+            "source": self.source if self.source is not None else '',
             "parents_type": None,
             "semantic_type": results['semanticType'],
-            "code_id": get_code_id(results['@id']),
+            "code_id": results['@id'],
             "parents_code_id": parents_code_id,
             "children": results['links']['children']
         }

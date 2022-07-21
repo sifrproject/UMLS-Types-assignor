@@ -719,16 +719,15 @@ def test_model(model, history, X_test_attributes, X_test_word_embedding, X_test_
                      enumerate(np.unique(y_train))}
     predicted = [dic_y_mapping[np.argmax(pred)] for pred in predicted_prob]
     evaluate_multi_classif(model, history, y_test, predicted, config)
+    return dic_y_mapping
 
 ######################################################################################
 
 def set_graph_prediction(bow_tokenizer, we_tokenizer, we_bigrams_detector, we_trigrams_detector, config):
     answer = input("Do you want to test model graph prediction? (y/n) ")
     if answer == "y" or answer == "Y" or answer == "":
-        answer = input("Enter the name of the concept (default=Melanoma): ")
-        name = answer if answer != "" else "Melanoma"
-        answer = input("Enter the source of the concept (default=MESH): ")
-        source = answer if answer != "" else "MESH"
+        answer = input("Enter the source of the concept (default=CHEBI): ")
+        source = answer if answer != "" else "CHEBI"
         answer = input("Enter the depth of the graph (default=2): ")
         try: depth = int(answer) if answer != "" else 2
         except: depth = 3
@@ -740,27 +739,36 @@ def set_graph_prediction(bow_tokenizer, we_tokenizer, we_bigrams_detector, we_tr
         portal = BioPortalAPI(api_key=BIOPORTAL_API_KEY)
 
         print("Loading concepts...")
-        root_link = portal.get_root_of_tree(name, source)
-        features = portal.get_features_from_link(root_link, None)
+        roots = portal.get_roots_of_tree(source)
+        
+        # features = portal.get_features_from_link(link, None)
         
         # Labels
-        if bow_tokenizer is not None:
-            sequences = bow_tokenizer.texts_to_sequences([features['labels']])
-            bow = bow_tokenizer.sequences_to_matrix(sequences, mode='tfidf')
-            features['labels'] = bow[0]
+        # if bow_tokenizer is not None:
+        #     sequences = bow_tokenizer.texts_to_sequences([features['labels']])
+        #     bow = bow_tokenizer.sequences_to_matrix(sequences, mode='tfidf')
+        #     features['labels'] = bow[0]
         # SAB
-        features['source'] = apply_SAB_preprocess(features['source'])
+        # features['source'] = apply_SAB_preprocess(features['source'])
         # Corpus
         stopwords = nltk.corpus.stopwords.words("english")
-        definition = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
-        we_definitions = apply_w2v([definition], we_bigrams_detector, we_trigrams_detector, we_tokenizer, config)
-        features['definition'] = we_definitions[0]
+        # definition = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
+        # we_definitions = apply_w2v([definition], we_bigrams_detector, we_trigrams_detector, we_tokenizer, config)
+        # features['definition'] = we_definitions[0]
 
-        new_node = Node(features)
-        linked_tree = LinkedTree(new_node)
-        children_link = features['children']
-        parents_code_id = features['code_id']
-        children_links_list = portal.get_children_links(children_link)
+        root_node_elements = {
+            "pref_label": 'root',
+            "labels": '',
+            "source": '',
+            "code_id": "https://data.bioontology.org/ontologies/" + str(source) + "/classes/roots",
+            "has_definition": False,
+            "definition": '',
+            "parents_type": None,
+            "parents_code_id": "",
+        }
+        root_node = Node(root_node_elements)
+        linked_tree = LinkedTree(root_node)
+        children_links_list = [ node['links']['self'] for node in roots ]
 
         def recursive_add_all_nodes(portal, children_links_list, parents_code_id, max_depth):
             if max_depth == 0:
@@ -790,13 +798,16 @@ def set_graph_prediction(bow_tokenizer, we_tokenizer, we_bigrams_detector, we_tr
                 recursive_add_all_nodes(
                     portal, children_links_list, new_parents_code_id, max_depth - 1)
 
-        recursive_add_all_nodes(portal, children_links_list, parents_code_id, depth - 1)
-        return linked_tree
-    return None
+        print("Loading concepts...")
+        recursive_add_all_nodes(portal, children_links_list, root_node.code_id, depth)
+        return linked_tree, source
+    return None, None
 
-def test_graph(model, linked_tree, config):
-    linked_tree.predict_graph(model, config)
-    pass
+def test_graph(model, linked_tree, dic_y_mapping, source, config):
+    print("Predicting graph...")
+    linked_tree.predict_graph(model, dic_y_mapping, config)
+    linked_tree.save_prediction_to_ttl(source, config)
+    return linked_tree
 
 def train_and_test(config):
     """Training and testing step
@@ -848,9 +859,9 @@ def train_and_test(config):
     # Test the model
     if config["verbose"]:
         print("Testing model...")
-    test_model(model, history, X_test_attributes,
+    dic_y_mapping = test_model(model, history, X_test_attributes,
                X_test_word_embedding, X_test_bow, y_train, y_test, config)
     
-    linked_tree = set_graph_prediction(bow_tokenizer, we_tokenizer, we_bigrams_detector, we_trigrams_detector, config)
+    linked_tree, source = set_graph_prediction(bow_tokenizer, we_tokenizer, we_bigrams_detector, we_trigrams_detector, config)
     if linked_tree is not None:
-        test_graph(model, linked_tree, config)
+        test_graph(model, linked_tree, dic_y_mapping, source, config)
