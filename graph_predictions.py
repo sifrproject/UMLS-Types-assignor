@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import numpy as np
 from process_data import get_parents_type_format
 
+
 def get_nb_rows(list_of_features):
     """Get the number of rows of a list of features
 
@@ -14,6 +15,7 @@ def get_nb_rows(list_of_features):
         int: nb_rows
     """
     return list_of_features[0].shape[0]
+
 
 def get_BIOPORTAL_API_KEY():
     # Import the .env file
@@ -26,6 +28,16 @@ def get_BIOPORTAL_API_KEY():
     except Exception as e:
         print("Env file not good")
         return None
+
+
+def split_code_id(code_id):
+    # Reverse the code_id
+    code_id = code_id[::-1]
+    arr = code_id.split("/")
+    code = arr[0][::-1]
+    link = code_id[len(code):][::-1]
+    return code, link
+
 
 class Node:
     """Class for the Node."""
@@ -40,7 +52,7 @@ class Node:
         self.definition = features['definition']
         self.parents_type = features['parents_type']
         self.parents_code_id = features['parents_code_id']
-        self.prediction = None # T127
+        self.prediction = None  # T127
         self.next = []
         self.previous = []
 
@@ -66,7 +78,7 @@ class LinkedTree:
                 node.add_child(new_node)
                 self.nodes.append(new_node)
                 return True
-            
+
     def get_node_from_code_id(self, code_id):
         for node in self.nodes:
             if node.code_id == code_id:
@@ -93,7 +105,7 @@ class LinkedTree:
                 color_map.append('red')
             else:
                 color_map.append('blue')
-                
+
             # Labeling
             labels_map[node] = node.label
 
@@ -117,7 +129,7 @@ class LinkedTree:
             parent_node = self.get_node_from_code_id(child.parents_code_id)
             G.add_edge(child, parent_node)
             self.recursively_add_edges(child, G)
-            
+
     def predict_graph(self, model, dic_y_mapping, config):
         for child in self.nodes[0].next:
             self.predict_recursively(child, model, dic_y_mapping, config)
@@ -127,13 +139,14 @@ class LinkedTree:
             print("Predicting node: " + node.label)
             features = self.get_graph_features(node, config)
             predicted_prob = model.predict(features)
-            predicted = [dic_y_mapping[np.argmax(pred)] for pred in predicted_prob]
+            predicted = [dic_y_mapping[np.argmax(
+                pred)] for pred in predicted_prob]
             node.prediction = predicted[0]
             print("Predicted", node.prediction)
             self.update_parents_type_of_children(node)
         for child in node.next:
             self.predict_recursively(child, model, dic_y_mapping, config)
-            
+
     def update_parents_type_of_children(self, node):
         for child in node.next:
             child.parents_type = node.prediction
@@ -147,7 +160,8 @@ class LinkedTree:
             features_attributes = []
             # Has_Def
             if "Has_Def" in config["attributes_features"]:
-                has_def = np.stack([1 if node.has_definition is True else False])
+                has_def = np.stack(
+                    [1 if node.has_definition is True else False])
                 features_attributes.append(has_def)
             # SAB
             if "SAB" in config["attributes_features"]:
@@ -159,31 +173,37 @@ class LinkedTree:
                     parents_type = node.parents_type
                 else:
                     parents_type = ""
-                parents_type_format = get_parents_type_format("TUI", [parents_type])
+                parents_type_format = get_parents_type_format(
+                    "TUI", [parents_type])
                 features_attributes.append(np.stack(parents_type_format))
 
-            attributes = np.concatenate((features_attributes[0], features_attributes[1], features_attributes[2]), None)
-            
+            attributes = np.concatenate(
+                (features_attributes[0], features_attributes[1], features_attributes[2]), None)
+
             features.append(np.stack([attributes]))
         if "Labels" in config["attributes_features"]:
             features.append(np.stack([node.labels]))
         return features
-    
+
     def save_prediction_to_ttl(self, source, config):
+        _code, onto = split_code_id(self.nodes[0].next[0].code_id)
         # Save the prediction to a ttl file
         f = open("artefact/predictions_" + str(source) + ".ttl", "w")
-        namespace_ontology = "@prefix onto: <https://data.bioontology.org/ontologies/> .\n"
-        namespace_bpm = "@prefix sty: <http://purl.bioontology.org/ontology/STY/> .\n"
+        namespace_ontology = "@prefix onto: <" + str(onto) + "> .\n"
+        namespace_bpm = "@prefix bpm: <http://bioportal.bioontology.org/ontologies/umls/> .\n"
+        namespace_sty = "@prefix sty: <http://purl.bioontology.org/ontology/STY/> .\n"
         f.write(namespace_ontology)
         f.write(namespace_bpm)
+        f.write(namespace_sty)
         f.write("\n")
 
         def recusively_write_prediction(node, f):
             if node.prediction is not None:
-                f.write("onto:" + str(source) + " " + node.code_id + " sty:" + node.prediction + "\n")
+                code, _onto = split_code_id(node.code_id)
+                f.write("onto:" + str(code) +
+                        " bpm:hasSTY sty:" + node.prediction + " .\n")
             for child in node.next:
                 recusively_write_prediction(child, f)
 
         recusively_write_prediction(self.nodes[0], f)
         f.close()
-
