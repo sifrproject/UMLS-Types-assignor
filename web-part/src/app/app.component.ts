@@ -87,17 +87,17 @@ export class AppComponent {
   parseContent(content: any) {
     try {
       if (content) {
-        const prefix1 = "@prefix onto: <https://data.bioontology.org/ontologies/> ."
+        const prefix1 = "@prefix bpm: <http://bioportal.bioontology.org/ontologies/umls/> ."
         const prefix2 = "@prefix sty: <http://purl.bioontology.org/ontology/STY/> ."
         if (!content.includes(prefix1) || !content.includes(prefix2)) {
           throw new Error('Invalid file format');
         }
 
         const lines = content.split('\n');
-        this.source = lines[3].split(' ')[0].split(':')[1];
+        this.source = this.files[0].name;
         lines.forEach((line: string) => {
           const parts = line.split(' ');
-          if (parts.length === 3) {
+          if (parts.length === 4 && parts[0][0] != '@') {
             const name = parts[2].split(':')[1]
             // Check if tuis already contains the name
             const index = this.tuis.findIndex((tui: tui) => {
