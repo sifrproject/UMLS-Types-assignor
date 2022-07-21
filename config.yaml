@@ -1,6 +1,6 @@
 # Initial settings
 verbose: true
-y_classificaton_column: "GUI" # Column which contains the classification result
+y_classificaton_column: "TUI" # Column which contains the classification result
 drop_classificaton_columns: []
 max_nb_data_per_class: 0 # Maximum number of rows to be classified. 0 if no limit
 attributes_features: ["Has_Def", "SAB", "Parents_Types", "Labels", "Def"] # Possible values: Has_Def, SAB, Parents_Types, Labels, Def
@@ -12,10 +12,10 @@ stemming: false
 lemmitization: true
 
 # Word2Vec
-vector_size: 300 # vector_size
-window: 8 # window
-w2v_epochs: 20
-sequence_length: 20 # sequence_length
+vector_size: 700 # vector_size
+window: 20 # window
+w2v_epochs: 40
+sequence_length: 100 # sequence_length
 
 # Numerical data
 numerical_data_shape: 130 # numerical_data_shape / 129 (ENG SAB) + 1 (Has_Definition) -> These are only the size that we can determine before running pipeline
@@ -26,27 +26,27 @@ neural_network:
     steps:
       - name: "Input-Word-Embedding"
         type: "Input"
-        input_shape: 20 # sequence_length
+        input_shape: 100 # sequence_length
       - name: "Embedding"
         type: "Embedding"
         input_shape: None # Len of vocabulary
-        imput_length: 20 # sequence_length
-        output_shape: 300 # vector_size
+        imput_length: 100 # sequence_length
+        output_shape: 700 # vector_size
         weights: "embeddings"
         trainable: false
       - name: "LSTM-1"
         type: "LSTM"
-        units: 20 # sequence_length
+        units: 100 # sequence_length
         dropout: 0.2
         return_sequences: true
       - name: "LSTM-2"
         type: "LSTM"
-        units: 20 # sequence_length
+        units: 100 # sequence_length
         dropout: 0.2
         return_sequences: false
       - name: "Dense-1-WE"
         type: "Dense"
-        units: 120
+        units: 220
         activation: "relu"
   multi_layer_perception:
     steps:

@@ -1,0 +1,133 @@
+<!-- Drag & Drop -->
+<div class="p-3">
+  <div class="dropzone" appDnd (fileDropped)="onFileDropped($event)">
+    <input
+      type="file"
+      #fileDropRef
+      multiple
+      (change)="fileBrowseHandler($event)"
+      (click)="resetClick($event)"
+    />
+    <div class="flex flex-row" style="padding: 1rem">
+      <div class="basis-1/3">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="63"
+          height="64"
+          viewBox="0 0 63 64"
+        >
+          <g fill="#3B454F" fill-rule="nonzero">
+            <path
+              d="M42.656 15.135a1.953 1.953 0 0 1-1.391-.578L31.5 4.795l-9.765 9.762a1.97 1.97 0 1 1-2.785-2.785L30.106.616a1.97 1.97 0 0 1 2.785 0l11.157 11.156a1.97 1.97 0 0 1-1.392 3.363z"
+            />
+            <path
+              d="M31.5 36.791a1.97 1.97 0 0 1-1.969-1.969V2.01a1.97 1.97 0 0 1 3.938 0v32.812a1.97 1.97 0 0 1-1.969 1.969z"
+            />
+            <path
+              d="M55.781 63.041H7.22A7.225 7.225 0 0 1 0 55.822V41.385a4.599 4.599 0 0 1 4.594-4.594h7.234a4.567 4.567 0 0 1 4.402 3.276l2.814 9.382a.658.658 0 0 0 .628.467h23.656a.658.658 0 0 0 .628-.467l2.814-9.385a4.572 4.572 0 0 1 4.402-3.273h7.234A4.599 4.599 0 0 1 63 41.385v14.437a7.225 7.225 0 0 1-7.219 7.219zM4.594 40.729a.656.656 0 0 0-.657.656v14.437a3.286 3.286 0 0 0 3.282 3.282H55.78a3.286 3.286 0 0 0 3.282-3.282V41.385a.656.656 0 0 0-.657-.656h-7.234a.65.65 0 0 0-.628.467L47.73 50.58a4.628 4.628 0 0 1-4.402 3.274H19.672a4.567 4.567 0 0 1-4.402-3.276l-2.814-9.382a.65.65 0 0 0-.628-.467H4.594z"
+            />
+          </g>
+        </svg>
+      </div>
+      <div class="basis-2/3">
+        <h3>Drag and drop .ttl here</h3>
+        <h3>or</h3>
+        <label for="fileDropRef">Browse for file</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div *ngIf="loadingTTL" class="p-3 grid place-content-center" role="status">
+  <div>
+    <svg
+      aria-hidden="true"
+      class="mr-2 w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+      viewBox="0 0 100 101"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+        fill="currentColor"
+      />
+      <path
+        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+        fill="currentFill"
+      />
+    </svg>
+    <span class="sr-only">Loading...</span>
+  </div>
+  <div>
+    <h4>Chargement du fichier .ttl</h4>
+  </div>
+</div>
+
+<!-- Error -->
+<div *ngIf="errorParsingFile" class="p-3 grid place-content-center w-1/2 mx-auto"  role="alert">
+  <div class="bg-red-500 text-white font-bold rounded-t px-4 py-2">
+    Error parsing file
+  </div>
+  <div class="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700">
+    <p>Be sure that the file is correctly following this example:</p>
+    <img class="object-contain rounded-lg" src="assets/template.png" alt="Example of a valid .ttl file" />
+  </div>
+</div>
+
+<!-- Table -->
+<div *ngIf="tuis.length > 0" class="p-5 flex justify-center min-h-screen bg-white">
+  <div class="col-span-12">
+    <div class="overflow-auto lg:overflow-visible">
+      <div class="flex lg:justify-between border-b-2 border-fuchsia-900 pb-1">
+        <h2 class="text-2xl text-gray-500 font-bold">Source: {{ source.toUpperCase() }}</h2>
+        <div class="text-center flex-auto">
+          <input
+            type="text"
+            name="name"
+            [(ngModel)]="search"
+            placeholder="Search..."
+            class="w-1/3 py-2 border-b-2 border-blue-600 outline-none focus:border-yellow-400"
+          />
+        </div>
+      </div>
+      <table class="table text-gray-400 border-separate space-y-5 text-sm">
+        <thead class="bg-blue-500 text-white">
+          <tr>
+            <th class="p-3">TUIs</th>
+            <th class="p-3">TUI's count</th>
+            <th class="p-3">Frequency</th>
+            <th class="p-3">F1-score of the TUI by the model (confidence)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let tui of tuis | filter: search"
+            class="bg-blue-200 lg:text-black"
+          >
+            <td class="p-3 text-center">{{ tui.name }}</td>
+            <td class="p-3 text-center">{{ tui.count }}</td>
+            <td class="p-3 text-center">{{ getFrequency(tui.count) }}%</td>
+            <td class="pt3 text-center">
+              <span
+                *ngIf="getColor(tui.f1score) === 'success'"
+                class="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-green-100 bg-green-600 rounded-full"
+                >{{ tui.f1score * 100 }}%</span
+              >
+              <span
+                *ngIf="getColor(tui.f1score) === 'warning'"
+                class="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-yellow-100 bg-yellow-600 rounded-full"
+                >{{ tui.f1score * 100 }}%</span
+              >
+              <span
+                *ngIf="getColor(tui.f1score) === 'danger'"
+                class="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"
+                >{{ tui.f1score * 100 }}%</span
+              >
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
