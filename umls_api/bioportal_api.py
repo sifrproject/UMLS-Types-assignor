@@ -102,4 +102,7 @@ class BioPortalAPI:
         if results is None:
             print("get_children_links", "No results found.")
             return None
-        return [i['links']['self'] for i in results['collection']]
+        try:
+            return [i['links']['self'] for i in results['collection']]
+        except:
+            return []

@@ -723,85 +723,63 @@ def test_model(model, history, X_test_attributes, X_test_word_embedding, X_test_
 
 ######################################################################################
 
-def set_graph_prediction(bow_tokenizer, we_tokenizer, we_bigrams_detector, we_trigrams_detector, config):
-    answer = input("Do you want to test model graph prediction? (y/n) ")
-    if answer == "y" or answer == "Y" or answer == "":
-        answer = input("Enter the source of the concept (default=CHEBI): ")
-        source = answer if answer != "" else "CHEBI"
-        answer = input("Enter the depth of the graph (default=2): ")
-        try: depth = int(answer) if answer != "" else 2
-        except: depth = 3
-        
-        BIOPORTAL_API_KEY = get_BIOPORTAL_API_KEY()
-        if BIOPORTAL_API_KEY is None:
-            print("BIOPORTAL_API_KEY is not set.")
-            return None
-        portal = BioPortalAPI(api_key=BIOPORTAL_API_KEY)
+def set_graph_prediction(source, bow_tokenizer, we_tokenizer, we_bigrams_detector, we_trigrams_detector, config):
 
-        print("Loading concepts...")
-        roots = portal.get_roots_of_tree(source)
-        
-        # features = portal.get_features_from_link(link, None)
-        
-        # Labels
-        # if bow_tokenizer is not None:
-        #     sequences = bow_tokenizer.texts_to_sequences([features['labels']])
-        #     bow = bow_tokenizer.sequences_to_matrix(sequences, mode='tfidf')
-        #     features['labels'] = bow[0]
-        # SAB
-        # features['source'] = apply_SAB_preprocess(features['source'])
-        # Corpus
-        stopwords = nltk.corpus.stopwords.words("english")
-        # definition = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
-        # we_definitions = apply_w2v([definition], we_bigrams_detector, we_trigrams_detector, we_tokenizer, config)
-        # features['definition'] = we_definitions[0]
+    BIOPORTAL_API_KEY = get_BIOPORTAL_API_KEY()
+    if BIOPORTAL_API_KEY is None:
+        print("BIOPORTAL_API_KEY is not set.")
+        return None, None
+    portal = BioPortalAPI(api_key=BIOPORTAL_API_KEY)
 
-        root_node_elements = {
-            "pref_label": 'root',
-            "labels": '',
-            "source": '',
-            "code_id": "https://data.bioontology.org/ontologies/" + str(source) + "/classes/roots",
-            "has_definition": False,
-            "definition": '',
-            "parents_type": None,
-            "parents_code_id": "",
-        }
-        root_node = Node(root_node_elements)
-        linked_tree = LinkedTree(root_node)
-        children_links_list = [ node['links']['self'] for node in roots ]
+    print("Loading concepts...")
+    roots = portal.get_roots_of_tree(source)
+    
+    stopwords = nltk.corpus.stopwords.words("english")
 
-        def recursive_add_all_nodes(portal, children_links_list, parents_code_id, max_depth):
-            if max_depth == 0:
-                return
-            for link in children_links_list:
-                features = portal.get_features_from_link(link, parents_code_id)
-                if features is None:
-                    continue
-                
-                # Labels
-                if bow_tokenizer is not None:
-                    sequences = bow_tokenizer.texts_to_sequences([features['labels']])
-                    bow = bow_tokenizer.sequences_to_matrix(sequences, mode='tfidf')
-                    features['labels'] = bow[0]
-                # SAB
-                features['source'] = apply_SAB_preprocess(features['source'])
-                # Corpus
-                definition = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
-                we_definitions = apply_w2v([definition], we_bigrams_detector, we_trigrams_detector, we_tokenizer, config)
-                features['definition'] = we_definitions[0]
-                
-                new_node = Node(features)
-                linked_tree.add_node(parents_code_id, new_node)
-                children_link = features['children']
-                new_parents_code_id = features['code_id']
-                children_links_list = portal.get_children_links(children_link)
-                recursive_add_all_nodes(
-                    portal, children_links_list, new_parents_code_id, max_depth - 1)
+    root_node_elements = {
+        "pref_label": 'root',
+        "labels": '',
+        "source": '',
+        "code_id": "https://data.bioontology.org/ontologies/" + str(source) + "/classes/roots",
+        "has_definition": False,
+        "definition": '',
+        "parents_type": None,
+        "parents_code_id": "",
+    }
+    root_node = Node(root_node_elements)
+    linked_tree = LinkedTree(root_node)
+    children_links_list = [ node['links']['self'] for node in roots ]
 
-        print("Loading concepts...")
-        recursive_add_all_nodes(portal, children_links_list, root_node.code_id, depth)
-        return linked_tree, source
-    return None, None
+    def recursive_add_all_nodes(portal, children_links_list, parents_code_id):
+        for link in children_links_list:
+            features = portal.get_features_from_link(link, parents_code_id)
+            if features is None:
+                continue
+            
+            # Labels
+            if bow_tokenizer is not None:
+                sequences = bow_tokenizer.texts_to_sequences([features['labels']])
+                bow = bow_tokenizer.sequences_to_matrix(sequences, mode='tfidf')
+                features['labels'] = bow[0]
+            # SAB
+            features['source'] = apply_SAB_preprocess(features['source'])
+            # Corpus
+            definition = utils_preprocessing_corpus(features['definition'], stopwords, config["stemming"], config["lemmitization"])
+            we_definitions = apply_w2v([definition], we_bigrams_detector, we_trigrams_detector, we_tokenizer, config)
+            features['definition'] = we_definitions[0]
+            
+            new_node = Node(features)
+            linked_tree.add_node(parents_code_id, new_node)
+            children_link = features['children']
+            new_parents_code_id = features['code_id']
+            children_links_list = portal.get_children_links(children_link)
+            recursive_add_all_nodes(
+                portal, children_links_list, new_parents_code_id)
+        return
+
+    print("Loading concepts...")
+    recursive_add_all_nodes(portal, children_links_list, root_node.code_id)
+    return linked_tree, source
 
 def test_graph(model, linked_tree, dic_y_mapping, source, config):
     print("Predicting graph...")
@@ -862,6 +840,11 @@ def train_and_test(config):
     dic_y_mapping = test_model(model, history, X_test_attributes,
                X_test_word_embedding, X_test_bow, y_train, y_test, config)
     
-    linked_tree, source = set_graph_prediction(bow_tokenizer, we_tokenizer, we_bigrams_detector, we_trigrams_detector, config)
-    if linked_tree is not None:
-        test_graph(model, linked_tree, dic_y_mapping, source, config)
+    if config["test_source"] and len(config["test_source"]) > 0:
+        sources = config["test_source"]
+    else:
+        return None
+    for source in sources:
+        linked_tree, source = set_graph_prediction(source, bow_tokenizer, we_tokenizer, we_bigrams_detector, we_trigrams_detector, config)
+        if linked_tree is not None:
+            test_graph(model, linked_tree, dic_y_mapping, source, config)

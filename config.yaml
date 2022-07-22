@@ -6,6 +6,7 @@ max_nb_data_per_class: 0 # Maximum number of rows to be classified. 0 if no limi
 attributes_features: ["Has_Def", "SAB", "Parents_Types", "Labels", "Def"] # Possible values: Has_Def, SAB, Parents_Types, Labels, Def
 test_size: 0.3 # Percentage of data used for testing
 debug_output_path: ""
+test_source: ["CHEBI", "BIPON"] # List of Source to be used for graph testing
 
 # Preprocessing
 stemming: false
@@ -117,5 +118,5 @@ neural_network:
   loss: "sparse_categorical_crossentropy"
   metrics: [] # Unused
   batch_size: 2
-  epochs: 10
+  epochs: 1
   shuffle: true
