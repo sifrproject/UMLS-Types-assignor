@@ -99,6 +99,9 @@ class BioPortalAPI:
             return json
         except Exception as e:
             print("get_features_from_link", str(e))
+            print("link", link)
+            print("results", results)
+            print("parents_code_id", parents_code_id)
             return None
 
     def get_children_links(self, children_collection_link):

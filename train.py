@@ -731,7 +731,6 @@ def set_graph_prediction(source, bow_tokenizer, we_tokenizer, we_bigrams_detecto
         return None, None
     portal = BioPortalAPI(api_key=BIOPORTAL_API_KEY)
 
-    print("Loading concepts...")
     roots = portal.get_roots_of_tree(source)
     
     stopwords = nltk.corpus.stopwords.words("english")
@@ -750,7 +749,9 @@ def set_graph_prediction(source, bow_tokenizer, we_tokenizer, we_bigrams_detecto
     linked_tree = LinkedTree(root_node)
     children_links_list = [ node['links']['self'] for node in roots ]
 
-    def recursive_add_all_nodes(portal, children_links_list, parents_code_id):
+    def recursive_add_all_nodes(portal, children_links_list, parents_code_id, depth):
+        print("depth", depth)
+        print("children_links_list", children_links_list)
         for link in children_links_list:
             features = portal.get_features_from_link(link, parents_code_id)
             if features is None:
@@ -774,11 +775,12 @@ def set_graph_prediction(source, bow_tokenizer, we_tokenizer, we_bigrams_detecto
             new_parents_code_id = features['code_id']
             children_links_list = portal.get_children_links(children_link)
             recursive_add_all_nodes(
-                portal, children_links_list, new_parents_code_id)
+                portal, children_links_list, new_parents_code_id, depth + 1)
         return
 
     print("Loading concepts...")
-    recursive_add_all_nodes(portal, children_links_list, root_node.code_id)
+    recursive_add_all_nodes(portal, children_links_list, root_node.code_id, 0)
+    print("Concepts loaded.")
     return linked_tree, source
 
 def test_graph(model, linked_tree, dic_y_mapping, source, config):
