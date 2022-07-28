@@ -31,13 +31,13 @@ UMLS_API_KEY=<your_api_key>
 $ pip install -r requirements.txt
 ```
 
-2- Launch pipeline
+2.1- Modify the configuration file as you want
 
-```bash
-$ python main.py --run_name="NAME_OF_THE_EXPERIMENT_RUN"
-```
+**Very important to check all the parameters**
 
-*You can use flags to customize the args in the pipeline*
+2.2- Launch pipeline
+
+You can use flags to customize the args in the pipeline
 
 ```bash
 $ python main.py -h
@@ -57,6 +57,40 @@ optional arguments:
                         Path of the output log.
   --run_name RUN_NAME   REQUIRED: Name of the run.
 ```
+
+
+**Examples:** 
+
+
+
+* **Launching all pipeline (data generation + preprocess + training & test + graph prediction)**
+```bash
+$ python main.py --run_name="NAME_OF_THE_EXPERIMENT_RUN"
+```
+
+---
+
+* **Launching in verbose mode only 100 data generation generating new artefact/data.csv**
+```bash
+$ python main.py --run_name="NAME_OF_THE_EXPERIMENT_RUN" --only_source --limit=100 --verbose
+```
+
+---
+
+* **Launching from preprocess generating new artefact/preprocessed_data.csv + training & test + graph prediction**
+```bash
+$ python main.py --run_name="NAME_OF_THE_EXPERIMENT_RUN" --only_source --limit=100 --verbose
+```
+
+---
+
+*The most used command*:
+
+* **Launching in verbose mode training & test + graph prediction**
+```bash
+python3 main.py --run_name="NAME_OF_THE_EXPERIMENT_RUN" --only_training --verbose
+```
+
 
 3- Use MlFlow UI to visualize data in [**localhost:5000**](http://127.0.0.1:5000/)
 
