@@ -724,6 +724,7 @@ def test_model(model, history, X_test_attributes, X_test_word_embedding, X_test_
 ######################################################################################
 
 def set_graph_prediction(source, bow_tokenizer, we_tokenizer, we_bigrams_detector, we_trigrams_detector, config):
+    global linked_tree
 
     BIOPORTAL_API_KEY = get_BIOPORTAL_API_KEY()
     if BIOPORTAL_API_KEY is None:
@@ -742,19 +743,23 @@ def set_graph_prediction(source, bow_tokenizer, we_tokenizer, we_bigrams_detecto
         "code_id": "https://data.bioontology.org/ontologies/" + str(source) + "/classes/roots",
         "has_definition": False,
         "definition": '',
-        "parents_type": None,
-        "parents_code_id": "",
+        "parents_type": [],
+        "parents_code_id": [],
     }
     root_node = Node(root_node_elements)
     linked_tree = LinkedTree(root_node)
     children_links_list = [ node['links']['self'] for node in roots ]
 
     def recursive_add_all_nodes(portal, children_links_list, parents_code_id, depth):
+        global linked_tree
         print("depth", depth)
         print("children_links_list", children_links_list)
         for link in children_links_list:
             features = portal.get_features_from_link(link, parents_code_id)
             if features is None:
+                continue
+            already_in_tree = linked_tree.update_node_if_already_set(features["code_id"], parents_code_id)
+            if already_in_tree is True:
                 continue
             
             # Labels
@@ -784,7 +789,6 @@ def set_graph_prediction(source, bow_tokenizer, we_tokenizer, we_bigrams_detecto
     return linked_tree, source
 
 def test_graph(model, linked_tree, dic_y_mapping, source, config):
-    print("Predicting graph...")
     linked_tree.predict_graph(model, dic_y_mapping, config)
     linked_tree.save_prediction_to_ttl(source, config)
     return linked_tree

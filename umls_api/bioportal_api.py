@@ -90,10 +90,10 @@ class BioPortalAPI:
                 "definition": definition,
                 "has_definition": True if definition is not None and len(definition) > 0 else False,
                 "source": self.source if self.source is not None else '',
-                "parents_type": None,
+                "parents_type": [],
                 "semantic_type": results['semanticType'],
                 "code_id": results['@id'],
-                "parents_code_id": parents_code_id,
+                "parents_code_id": [parents_code_id],
                 "children": results['links']['children']
             }
             return json

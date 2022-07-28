@@ -1,21 +1,21 @@
 # Initial settings
-verbose: true
+verbose: true # Verbose output
 y_classificaton_column: "TUI" # Column which contains the classification result
 drop_classificaton_columns: []
 max_nb_data_per_class: 0 # Maximum number of rows to be classified. 0 if no limit
 attributes_features: ["Has_Def", "SAB", "Parents_Types", "Labels", "Def"] # Possible values: Has_Def, SAB, Parents_Types, Labels, Def
 test_size: 0.3 # Percentage of data used for testing
-debug_output_path: ""
-test_source: ["CHEBI", "BIPON"] # List of Source to be used for graph testing
+debug_output_path: "" # It is used to store the debug output
+test_source: ["AEO"] # List of Source to be used for graph testing
 
 # Preprocessing
-stemming: false
-lemmitization: true
+stemming: false # Stemming of the words
+lemmitization: true # Lemmitization of the words
 
 # Word2Vec
 vector_size: 700 # vector_size
 window: 20 # window
-w2v_epochs: 40
+w2v_epochs: 40 # w2v_epochs
 sequence_length: 100 # sequence_length
 
 # Numerical data

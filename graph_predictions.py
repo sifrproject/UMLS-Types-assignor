@@ -147,9 +147,20 @@ class LinkedTree:
         for child in node.next:
             self.predict_recursively(child, model, dic_y_mapping, config)
 
-    def update_parents_type_of_children(self, node):
+    def recursively_find_all_children(self, node, code_id, list_children):
+        if node.code_id == code_id:
+            list_children.append(node)
         for child in node.next:
-            child.parents_type = node.prediction
+            self.recursively_find_all_children(child, code_id, list_children)
+        return list_children
+
+    def update_parents_type_of_children(self, node):
+        list_children = self.recursively_find_all_children(
+            self.nodes[0], node.code_id, [])
+        for child in list_children:
+            for parents_type in node.parents_type:
+                child.parents_type.append(parents_type)
+            
 
     def get_graph_features(self, node, config):
         features = []
@@ -169,16 +180,15 @@ class LinkedTree:
                 features_attributes.append(source)
             # Parents_Types
             if "Parents_Types" in config["attributes_features"]:
-                if node.parents_type is not None:
-                    parents_type = node.parents_type
+                if node.parents_type is not None and len(node.parents_type) > 0:
+                    parents_type = " ".join(node.parents_type)
                 else:
                     parents_type = ""
                 parents_type_format = get_parents_type_format(
                     "TUI", [parents_type])
                 features_attributes.append(np.stack(parents_type_format))
 
-            attributes = np.concatenate(
-                (features_attributes[0], features_attributes[1], features_attributes[2]), None)
+            attributes = np.concatenate(features_attributes, None)
 
             features.append(np.stack([attributes]))
         if "Labels" in config["attributes_features"]:
@@ -186,6 +196,7 @@ class LinkedTree:
         return features
 
     def save_prediction_to_ttl(self, source, config):
+        print("Saving prediction to ttl")
         _code, onto = split_code_id(self.nodes[0].next[0].code_id)
         # Save the prediction to a ttl file
         f = open("artefact/predictions_" + str(source) + ".ttl", "w")
@@ -207,3 +218,19 @@ class LinkedTree:
 
         recusively_write_prediction(self.nodes[0], f)
         f.close()
+        
+    def recursively_get_node(self, node, code_id):
+        if node.code_id == code_id:
+            return node
+        for child in node.next:
+            result = self.recursively_get_node(child, code_id)
+            if result is not None:
+                return result
+        return None
+        
+    def update_node_if_already_set(self, code_id, new_parents_code_id):
+        node = self.recursively_get_node(self.nodes[0], code_id)
+        if node is not None:
+            node.parents_code_id.append(new_parents_code_id)
+            return True
+        return False
